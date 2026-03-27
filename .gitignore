@@ -1,0 +1,15 @@
+# Dependencies
+vendor/
+
+# WordPress core (dev environment)
+wp/
+
+# Build artifacts
+wp-governance-*.zip
+
+# PHPUnit
+.phpunit.result.cache
+phpunit.xml.bak
+
+# Project docs (internal)
+PRD.md
