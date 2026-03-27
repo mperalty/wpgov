@@ -26,6 +26,23 @@ Because the entire policy is a single PHP file, you can:
 - **Avoid database drift** — settings live in code, not in `wp_options` rows that can be changed through the admin, lost during migrations, or diverge between environments
 - **Onboard new sites instantly** — drop the mu-plugin and config file in, and the full policy is active on the next page load with nothing to configure through the UI
 
+## Coming from Drupal?
+
+If you've managed Drupal sites, most of WP Governance will feel familiar — it's the same idea as config sync, just shaped for WordPress.
+
+| Drupal concept | WP Governance equivalent |
+|---|---|
+| `core.extension.yml` / config sync directory | `wp-governance-config.php` — one file that declares the full policy |
+| `$config` overrides in `settings.php` | The entire approach — config lives in a PHP file, not the database |
+| `drush config:export` | `wp governance export` |
+| `drush config:import` | Not needed — deploy the file and the policy is live on the next page load |
+| Config Split (per-environment config) | `define('WP_GOVERNANCE_CONFIG', '/path/to/env-config.php')` in `wp-config.php` |
+| Permissions page (`admin/people/permissions`) | `deny_capabilities` — same role/capability matrix, defined in config |
+| SecKit module | `security.headers` + `security` toggles (pingback, author enumeration, etc.) |
+| Security Review / `drush security:check` | `wp governance audit` — opinionated checklist of ungoverned items |
+
+The mental model is the same: define your site's policy in code, commit it, and deploy it across environments. The difference is that WordPress doesn't have a native config management layer, so WP Governance fills that gap for the operational and security settings that matter most. There's no export/import cycle — the PHP file _is_ the active config, read on every request.
+
 ## Requirements
 
 - PHP >= 8.1
