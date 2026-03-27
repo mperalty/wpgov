@@ -401,6 +401,108 @@ class ConfigTest extends WP_UnitTestCase {
         remove_role( 'empty_role' );
     }
 
+    // ── Environment ─────────────────────────────────────────────
+
+    public function test_environment_returns_valid_type(): void {
+        $env = Config::environment();
+        $this->assertContains( $env, array( 'local', 'development', 'staging', 'production' ) );
+    }
+
+    public function test_environment_path_is_empty_when_no_override_exists(): void {
+        $this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
+        Config::reset();
+        Config::get();
+
+        // No matching override file in fixtures, so path should be empty.
+        $this->assertSame( '', Config::environment_path() );
+    }
+
+    // ── Deep Merge ──────────────────────────────────────────────
+
+    public function test_deep_merge_overrides_scalar_values(): void {
+        $result = Config::deep_merge(
+            array( 'unrestricted_role' => 'administrator' ),
+            array( 'unrestricted_role' => 'editor' )
+        );
+
+        $this->assertSame( 'editor', $result['unrestricted_role'] );
+    }
+
+    public function test_deep_merge_recursively_merges_associative_arrays(): void {
+        $result = Config::deep_merge(
+            array( 'features' => array( 'disable_xmlrpc' => true, 'disable_file_editor' => true ) ),
+            array( 'features' => array( 'disable_xmlrpc' => false ) )
+        );
+
+        $this->assertFalse( $result['features']['disable_xmlrpc'] );
+        $this->assertTrue( $result['features']['disable_file_editor'] );
+    }
+
+    public function test_deep_merge_replaces_lists_entirely(): void {
+        $result = Config::deep_merge(
+            array( 'restricted_menu_slugs' => array( 'tools.php', 'options-general.php' ) ),
+            array( 'restricted_menu_slugs' => array( 'tools.php' ) )
+        );
+
+        $this->assertSame( array( 'tools.php' ), $result['restricted_menu_slugs'] );
+    }
+
+    public function test_deep_merge_preserves_base_keys_not_in_override(): void {
+        $result = Config::deep_merge(
+            array(
+                'features' => array( 'disable_xmlrpc' => true ),
+                'login'    => array( 'hide_login_errors' => true ),
+            ),
+            array(
+                'features' => array( 'disable_xmlrpc' => false ),
+            )
+        );
+
+        $this->assertFalse( $result['features']['disable_xmlrpc'] );
+        $this->assertTrue( $result['login']['hide_login_errors'] );
+    }
+
+    public function test_deep_merge_adds_new_keys_from_override(): void {
+        $result = Config::deep_merge(
+            array( 'features' => array( 'disable_xmlrpc' => true ) ),
+            array( 'features' => array( 'disable_comments' => true ) )
+        );
+
+        $this->assertTrue( $result['features']['disable_xmlrpc'] );
+        $this->assertTrue( $result['features']['disable_comments'] );
+    }
+
+    public function test_deep_merge_empty_override_replaces_base(): void {
+        $result = Config::deep_merge(
+            array( 'restricted_menu_slugs' => array( 'tools.php' ) ),
+            array( 'restricted_menu_slugs' => array() )
+        );
+
+        $this->assertSame( array(), $result['restricted_menu_slugs'] );
+    }
+
+    public function test_deep_merge_nested_associative_arrays(): void {
+        $result = Config::deep_merge(
+            array(
+                'security' => array(
+                    'headers'                 => array( 'X-Frame-Options' => 'DENY', 'X-Content-Type-Options' => 'nosniff' ),
+                    'disable_author_archives' => true,
+                ),
+            ),
+            array(
+                'security' => array(
+                    'headers' => array( 'X-Frame-Options' => 'SAMEORIGIN' ),
+                ),
+            )
+        );
+
+        $this->assertSame( 'SAMEORIGIN', $result['security']['headers']['X-Frame-Options'] );
+        $this->assertSame( 'nosniff', $result['security']['headers']['X-Content-Type-Options'] );
+        $this->assertTrue( $result['security']['disable_author_archives'] );
+    }
+
+    // ── Unrestricted User ────────────────────────────────────────
+
     public function test_user_with_exact_custom_role_is_unrestricted(): void {
         add_role( 'governance_admin', 'Governance Admin', [ 'read' => true, 'manage_options' => true ] );
 

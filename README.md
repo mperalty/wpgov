@@ -37,7 +37,7 @@ If you've managed Drupal sites, most of WP Governance will feel familiar — it'
 | `$config` overrides in `settings.php` | The entire approach — config lives in a PHP file, not the database |
 | `drush config:export` | `wp governance export` |
 | `drush config:import` | Not needed — deploy the file and the policy is live on the next page load |
-| Config Split (per-environment config) | `define('WP_GOVERNANCE_CONFIG', '/path/to/env-config.php')` in `wp-config.php` |
+| Config Split (per-environment config) | Environment overrides — `wp-governance-config.local.php`, `.staging.php`, `.production.php` merged on top of the base, keyed to `WP_ENVIRONMENT_TYPE` |
 | Permissions page (`admin/people/permissions`) | `deny_capabilities` — same role/capability matrix, defined in config |
 | SecKit module | `security.headers` + `security` toggles (pingback, author enumeration, etc.) |
 | Security Review / `drush security:check` | `wp governance audit` — opinionated checklist of ungoverned items |
@@ -73,6 +73,36 @@ define( 'WP_GOVERNANCE_CONFIG', '/absolute/path/to/wp-governance-config.php' );
 ```
 
 The shipped sample config lives at `wp-governance/wp-governance-config.php`.
+
+## Environment-Specific Overrides
+
+WP Governance automatically deep-merges an environment-specific override file on top of the base config. The environment is read from the `WP_ENVIRONMENT_TYPE` constant (set it in `wp-config.php`).
+
+Create a file alongside your base config named `wp-governance-config.{environment}.php`:
+
+```
+wp-governance-config.php              ← base (shared across all environments)
+wp-governance-config.local.php        ← overrides for local development
+wp-governance-config.staging.php      ← overrides for staging
+wp-governance-config.production.php   ← overrides for production
+```
+
+Only include the keys you want to change — everything else inherits from the base:
+
+```php
+// wp-governance-config.local.php — loosen restrictions for local dev
+return array(
+    'features' => array(
+        'disable_xmlrpc'      => false,   // re-enable for local testing
+        'restrict_rest_api'   => false,   // allow unauthenticated API access
+    ),
+    'locked_options' => array(
+        'blog_public' => 0,               // block search engines on local
+    ),
+);
+```
+
+Associative arrays (like `features`, `security.headers`) are merged recursively — override keys win, base keys are preserved. Lists (like `restricted_menu_slugs`) are replaced entirely. `wp governance status` shows which environment and override file are active.
 
 ## Policy Recipes
 

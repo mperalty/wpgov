@@ -85,6 +85,13 @@ class CLI extends \WP_CLI_Command {
 			WP_CLI::warning( 'Config file not found: ' . $path );
 		}
 
+		WP_CLI::log( WP_CLI::colorize( '%bEnvironment:%n    ' . Config::environment() ) );
+
+		$env_path = Config::environment_path();
+		if ( '' !== $env_path ) {
+			WP_CLI::log( WP_CLI::colorize( '%bEnv override:%n   ' . $env_path ) );
+		}
+
 		WP_CLI::log( WP_CLI::colorize( '%bUnrestricted role:%n ' . ( $config['unrestricted_role'] ?? 'administrator' ) ) );
 		WP_CLI::log( '' );
 

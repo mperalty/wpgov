@@ -22,6 +22,9 @@ class Config {
 	/** @var array|null Cached defaults from the shipped sample config. */
 	private static ?array $sample_defaults = null;
 
+	/** @var string Resolved environment override file path (empty if none). */
+	private static string $environment_path = '';
+
 	/**
 	 * Default config structure used for validation.
 	 */
@@ -110,6 +113,36 @@ class Config {
 			self::$path = self::resolve_path();
 		}
 		return self::$path;
+	}
+
+	/**
+	 * Get the current WordPress environment type.
+	 *
+	 * @return string One of: local, development, staging, production.
+	 */
+	public static function environment(): string {
+		if ( function_exists( 'wp_get_environment_type' ) ) {
+			return wp_get_environment_type();
+		}
+
+		if ( defined( 'WP_ENVIRONMENT_TYPE' ) ) {
+			$type  = (string) WP_ENVIRONMENT_TYPE;
+			$valid = array( 'local', 'development', 'staging', 'production' );
+			return in_array( $type, $valid, true ) ? $type : 'production';
+		}
+
+		return 'production';
+	}
+
+	/**
+	 * Get the resolved environment override file path (empty if none loaded).
+	 *
+	 * @return string
+	 */
+	public static function environment_path(): string {
+		// Ensure config has been loaded so the path is resolved.
+		self::get();
+		return self::$environment_path;
 	}
 
 	/**
@@ -218,9 +251,9 @@ class Config {
 	}
 
 	/**
-	 * Load and validate the config file.
+	 * Load and validate the config file, then merge any environment override.
 	 *
-	 * @param string $path Absolute path to config file.
+	 * @param string $path Absolute path to base config file.
 	 * @return array Validated config or empty array on failure.
 	 */
 	private static function load( string $path ): array {
@@ -234,6 +267,19 @@ class Config {
 		if ( ! is_array( $config ) ) {
 			self::warn( "WP Governance: config file at {$path} did not return an array." );
 			return self::DEFAULTS;
+		}
+
+		// Merge environment-specific override (e.g. config.local.php).
+		$env_path = self::resolve_environment_path( $path );
+		if ( '' !== $env_path ) {
+			self::$environment_path = $env_path;
+			$override               = include $env_path;
+
+			if ( is_array( $override ) ) {
+				$config = self::deep_merge( $config, $override );
+			} else {
+				self::warn( "WP Governance: environment override at {$env_path} did not return an array." );
+			}
 		}
 
 		foreach ( self::validation_errors( $config ) as $error ) {
@@ -1459,11 +1505,71 @@ class Config {
 	}
 
 	/**
+	 * Determine the environment-specific override file path.
+	 *
+	 * Given a base config path like `/path/to/wp-governance-config.php`,
+	 * looks for `/path/to/wp-governance-config.{environment}.php`.
+	 *
+	 * @param string $base_path Base config file path.
+	 * @return string Override file path if readable, empty string otherwise.
+	 */
+	private static function resolve_environment_path( string $base_path ): string {
+		$env  = self::environment();
+		$dir  = dirname( $base_path );
+		$file = basename( $base_path, '.php' );
+		$path = $dir . '/' . $file . '.' . $env . '.php';
+
+		/**
+		 * Filter the environment override file path.
+		 *
+		 * @param string $path        Resolved override path.
+		 * @param string $environment Current environment type.
+		 * @param string $base_path   Base config file path.
+		 */
+		$path = (string) apply_filters( 'wp_governance_environment_config_path', $path, $env, $base_path );
+
+		return is_readable( $path ) ? $path : '';
+	}
+
+	/**
+	 * Deep-merge two config arrays.
+	 *
+	 * Associative arrays are merged recursively (override keys win).
+	 * Lists (sequential integer keys) and scalars are replaced entirely.
+	 * Only include keys you want to change in the override file.
+	 *
+	 * @param array $base     Base config array.
+	 * @param array $override Override values.
+	 * @return array Merged result.
+	 */
+	public static function deep_merge( array $base, array $override ): array {
+		foreach ( $override as $key => $value ) {
+			if (
+				is_array( $value ) &&
+				! empty( $value ) &&
+				isset( $base[ $key ] ) &&
+				is_array( $base[ $key ] ) &&
+				! array_is_list( $value ) &&
+				! array_is_list( $base[ $key ] )
+			) {
+				// Both sides are non-empty associative arrays — recurse.
+				$base[ $key ] = self::deep_merge( $base[ $key ], $value );
+			} else {
+				// Scalar, list, or type mismatch — override wins.
+				$base[ $key ] = $value;
+			}
+		}
+
+		return $base;
+	}
+
+	/**
 	 * Reset cached config. Primarily for testing.
 	 */
 	public static function reset(): void {
-		self::$config          = null;
-		self::$path            = '';
-		self::$sample_defaults = null;
+		self::$config           = null;
+		self::$path             = '';
+		self::$sample_defaults  = null;
+		self::$environment_path = '';
 	}
 }

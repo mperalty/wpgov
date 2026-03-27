@@ -8,6 +8,12 @@
  *
  * To use a custom path for this file, define WP_GOVERNANCE_CONFIG in wp-config.php:
  *     define('WP_GOVERNANCE_CONFIG', '/path/to/governance-config.php');
+ *
+ * Environment-specific overrides:
+ *     Create a file named wp-governance-config.{environment}.php alongside this
+ *     file (e.g. wp-governance-config.local.php) and it will be deep-merged on
+ *     top of this base config. The environment is read from WP_ENVIRONMENT_TYPE.
+ *     Only include the keys you want to override — everything else inherits.
  */
 
 // phpcs:disable Squiz.PHP.CommentedOutCode.Found
