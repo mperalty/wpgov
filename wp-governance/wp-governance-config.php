@@ -341,4 +341,27 @@ return array(
 	//     ),
 
 	'custom_rules'             => array(),
+
+	// ─── Locked Options ─────────────────────────────────────────────────────────
+	// Pin wp_options values from this file. Each entry overrides the database
+	// value at runtime (via pre_option_) and silently blocks writes. The admin
+	// form fields are disabled automatically.
+	//
+	// This generalises the individual feature toggles for tagline and permalink
+	// locking: anything that lives in a Settings page can be pinned here.
+	//
+	// Note: WordPress treats a pre_option_ return of `false` as "not set."
+	// Use 0, '', or 'no' instead of false for boolean-like options.
+
+	'locked_options'           => array(
+		// 'permalink_structure' => '/%postname%/',
+		// 'date_format'         => 'Y-m-d',
+		// 'time_format'         => 'H:i',
+		// 'timezone_string'     => 'America/New_York',
+		// 'posts_per_page'      => 10,
+		// 'blog_public'         => 1,
+		// 'default_role'        => 'subscriber',
+		// 'start_of_week'       => 1,
+		// 'blogdescription'     => 'My Tagline',
+	),
 );

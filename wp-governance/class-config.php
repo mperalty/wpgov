@@ -42,6 +42,7 @@ class Config {
 		'post_types'               => array(),
 		'security'                 => array(),
 		'custom_rules'             => array(),
+		'locked_options'           => array(),
 	);
 
 	/**
@@ -180,6 +181,7 @@ class Config {
 		self::validate_post_types( $config, $errors );
 		self::validate_security( $config, $errors );
 		self::validate_custom_rules( $config, $errors );
+		self::validate_locked_options( $config, $errors );
 
 		if ( isset( $config['unrestricted_role'] ) && ! is_string( $config['unrestricted_role'] ) ) {
 			$errors[] = "'unrestricted_role' should be a string.";
@@ -268,6 +270,7 @@ class Config {
 		$normalized['post_types']              = self::normalize_post_types( $config['post_types'] ?? null );
 		$normalized['security']                = self::normalize_security( $config['security'] ?? null );
 		$normalized['custom_rules']            = self::normalize_custom_rules( $config['custom_rules'] ?? null );
+		$normalized['locked_options']           = self::normalize_locked_options( $config['locked_options'] ?? null );
 
 		if ( isset( $config['unrestricted_role'] ) && is_string( $config['unrestricted_role'] ) ) {
 			$role = sanitize_key( $config['unrestricted_role'] );
@@ -1136,6 +1139,54 @@ class Config {
 				! empty( $rule['front_only'] )
 			) {
 				$errors[] = "Custom rule '{$name}' cannot be both admin_only and front_only.";
+			}
+		}
+	}
+
+	/**
+	 * Normalize locked_options to a clean key => value map.
+	 *
+	 * @param mixed $value Raw section value.
+	 * @return array
+	 */
+	private static function normalize_locked_options( $value ): array {
+		if ( ! is_array( $value ) || empty( $value ) ) {
+			return array();
+		}
+
+		$clean = array();
+		foreach ( $value as $key => $val ) {
+			if ( is_string( $key ) && '' !== $key ) {
+				$clean[ $key ] = $val;
+			}
+		}
+		return $clean;
+	}
+
+	/**
+	 * Validate the locked_options section.
+	 *
+	 * @param array    $config Raw config.
+	 * @param string[] $errors Error accumulator.
+	 */
+	private static function validate_locked_options( array $config, array &$errors ): void {
+		if ( ! array_key_exists( 'locked_options', $config ) ) {
+			return;
+		}
+
+		if ( ! is_array( $config['locked_options'] ) ) {
+			$errors[] = "'locked_options' should be an associative array of option_name => value pairs.";
+			return;
+		}
+
+		foreach ( $config['locked_options'] as $key => $value ) {
+			if ( ! is_string( $key ) || '' === $key ) {
+				$errors[] = "'locked_options' keys must be non-empty strings (WordPress option names).";
+				break;
+			}
+
+			if ( false === $value ) {
+				$errors[] = "'locked_options.{$key}' is set to false — pre_option_ cannot lock to literal false. Use 0, '', or 'no' instead.";
 			}
 		}
 	}

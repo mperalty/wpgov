@@ -13,6 +13,7 @@ WP Governance is a file-based WordPress mu-plugin for locking down admin feature
 - **Security hardening** — inject HTTP security headers, disable author archives, strip version strings, block file editing, and add noindex headers for staging environments
 - **Head cleanup** — remove RSD, WLW manifest, shortlinks, feed links, and REST API links from `<head>`
 - **Post types** — hide post types from the admin and selectively remove feature support (e.g. trackbacks, custom fields, comments)
+- **Locked options** — pin any `wp_options` value (permalink structure, date format, timezone, posts per page, etc.) from the config file so the database value never wins
 - **Custom rules** — register your own governance callbacks with hook, priority, and admin/front targeting
 - **Role-based bypass** — exempt a role (and above) from all restrictions so administrators keep full access
 
@@ -40,6 +41,7 @@ If you've managed Drupal sites, most of WP Governance will feel familiar — it'
 | Permissions page (`admin/people/permissions`) | `deny_capabilities` — same role/capability matrix, defined in config |
 | SecKit module | `security.headers` + `security` toggles (pingback, author enumeration, etc.) |
 | Security Review / `drush security:check` | `wp governance audit` — opinionated checklist of ungoverned items |
+| `system.date` / `system.site` config objects | `locked_options` — pin any `wp_options` value (date format, timezone, site name, etc.) from the config file |
 
 The mental model is the same: define your site's policy in code, commit it, and deploy it across environments. The difference is that WordPress doesn't have a native config management layer, so WP Governance fills that gap for the operational and security settings that matter most. There's no export/import cycle — the PHP file _is_ the active config, read on every request.
 
@@ -93,6 +95,18 @@ Turn off update checks and UI in a locked-down environment:
 'features' => array(
     'disable_updates'        => true,
     'disable_auto_update_ui' => true,
+),
+```
+
+Pin settings so they can't drift across environments:
+
+```php
+'locked_options' => array(
+    'permalink_structure' => '/%postname%/',
+    'date_format'         => 'Y-m-d',
+    'timezone_string'     => 'America/New_York',
+    'posts_per_page'      => 10,
+    'blog_public'         => 1,
 ),
 ```
 

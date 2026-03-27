@@ -34,6 +34,7 @@ class Governance {
 		'admin_footer'             => array( 'class-admin-footer.php', 'Admin_Footer' ),
 		'post_types'               => array( 'class-post-types.php', 'Post_Types' ),
 		'security'                 => array( 'class-security.php', 'Security' ),
+		'locked_options'           => array( 'class-locked-options.php', 'Locked_Options' ),
 	);
 
 	private function __construct() {

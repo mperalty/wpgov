@@ -216,6 +216,14 @@ class CLI extends \WP_CLI_Command {
 			'status'       => count( $custom ) > 0 ? 'enforcing' : 'off',
 		);
 
+		// Locked options.
+		$locked = $config['locked_options'] ?? array();
+		$rows[] = array(
+			'module'       => 'Locked Options',
+			'active_rules' => (string) count( $locked ),
+			'status'       => count( $locked ) > 0 ? 'enforcing' : 'off',
+		);
+
 		$format    = $assoc_args['format'] ?? 'table';
 		$formatter = new Formatter( $assoc_args, array( 'module', 'active_rules', 'status' ) );
 		$formatter->display_items( $rows );
@@ -650,6 +658,7 @@ class CLI extends \WP_CLI_Command {
 		$this->audit_admin_bar_nodes( $config, $findings );
 		$this->audit_dashboard_widgets( $config, $findings );
 		$this->audit_admin_footer_settings( $config, $findings );
+		$this->audit_locked_options( $config, $findings );
 
 		// Filter by severity.
 		$severity = $assoc_args['severity'] ?? 'all';
@@ -951,6 +960,20 @@ class CLI extends \WP_CLI_Command {
 					'setting'  => 'remove_dashboard_widgets',
 				);
 			}
+		}
+	}
+
+	/**
+	 * Check whether any wp_options values are pinned.
+	 */
+	private function audit_locked_options( array $config, array &$findings ): void {
+		if ( empty( $config['locked_options'] ) ) {
+			$findings[] = array(
+				'severity' => 'medium',
+				'category' => 'Locked Options',
+				'finding'  => 'No wp_options values are pinned — settings like date format, timezone, and posts per page can drift via the admin',
+				'setting'  => 'locked_options',
+			);
 		}
 	}
 
