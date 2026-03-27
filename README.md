@@ -160,9 +160,13 @@ Examples:
 ```bash
 wp governance status
 wp governance check
+wp governance audit
+wp governance audit --severity=high
 wp governance diff
 wp governance get features --format=json
 wp governance mimes
 ```
+
+`wp governance audit` scans the site against an opinionated checklist and reports everything that isn't locked down — ungoverned features, missing security headers, open upload types, default admin bar nodes, and more. Use `--severity=high` to focus on the most critical findings.
 
 `wp governance diff` compares the active config against the shipped sample defaults, not the fail-open runtime schema.
