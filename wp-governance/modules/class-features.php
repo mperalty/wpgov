@@ -97,6 +97,7 @@ class Features {
 
 		if ( $this->on( 'disable_user_registration' ) ) {
 			add_filter( 'option_users_can_register', '__return_zero' );
+			$this->hide_registration_toggle();
 		}
 
 		if ( $this->on( 'disable_customizer' ) ) {
@@ -149,6 +150,7 @@ class Features {
 				10,
 				2
 			);
+			$this->lock_permalink_ui();
 		}
 
 		if ( $this->on( 'disable_wp_cron' ) ) {
@@ -156,6 +158,43 @@ class Features {
 				define( 'DISABLE_WP_CRON', true );
 			}
 		}
+	}
+
+	/**
+	 * Hide the "Anyone can register" checkbox on Settings → General.
+	 */
+	private function hide_registration_toggle(): void {
+		add_action(
+			'admin_head-options-general.php',
+			static function (): void {
+				echo '<style>tr:has(#users_can_register) { display: none !important; }</style>';
+			}
+		);
+	}
+
+	/**
+	 * Disable permalink controls and show a notice on Settings → Permalinks.
+	 */
+	private function lock_permalink_ui(): void {
+		add_action(
+			'admin_notices',
+			static function (): void {
+				$screen = get_current_screen();
+				if ( ! $screen || 'options-permalink' !== $screen->id ) {
+					return;
+				}
+				echo '<div class="notice notice-warning"><p>';
+				echo esc_html__( 'Permalink structure is locked by WP Governance and cannot be changed.' );
+				echo '</p></div>';
+			}
+		);
+
+		add_action(
+			'admin_head-options-permalink.php',
+			static function (): void {
+				echo '<style>input[name="selection"], input[name="permalink_structure"] { pointer-events: none; opacity: 0.5; }</style>';
+			}
+		);
 	}
 
 	/**

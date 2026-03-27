@@ -123,6 +123,12 @@ class FeaturesTest extends WP_UnitTestCase {
         $this->assertEquals( 0, apply_filters( 'option_users_can_register', 1 ) );
     }
 
+    public function test_user_registration_hides_admin_toggle(): void {
+        $this->load_module_with( [ 'disable_user_registration' => true ] );
+
+        $this->assertNotFalse( has_action( 'admin_head-options-general.php' ) );
+    }
+
     // ── Comments ─────────────────────────────────────────────────
 
     public function test_comments_closed_when_disabled(): void {
@@ -228,6 +234,13 @@ class FeaturesTest extends WP_UnitTestCase {
         $this->assertSame( '/old/', $result );
     }
 
+    public function test_permalink_lock_disables_admin_ui(): void {
+        $this->load_module_with( [ 'lock_permalink_structure' => true ] );
+
+        $this->assertNotFalse( has_action( 'admin_notices' ) );
+        $this->assertNotFalse( has_action( 'admin_head-options-permalink.php' ) );
+    }
+
     // ── Helper ───────────────────────────────────────────────────
 
     /**
@@ -299,6 +312,8 @@ class FeaturesTest extends WP_UnitTestCase {
             'do_feed_atom_comments',
             'pre_update_option_blogdescription',
             'pre_update_option_permalink_structure',
+            'admin_head-options-general.php',
+            'admin_head-options-permalink.php',
             'load-plugins.php',
             'load-themes.php',
             'load-update-core.php',

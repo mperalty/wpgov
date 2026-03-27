@@ -21,6 +21,22 @@ class Login {
 		if ( ! empty( $this->settings['disable_password_reset'] ) ) {
 			add_filter( 'allow_password_reset', '__return_false' );
 			add_filter( 'show_password_fields', '__return_false' );
+
+			// Redirect lost password form back to login.
+			$redirect = static function (): void {
+				wp_safe_redirect( wp_login_url() );
+				exit;
+			};
+			add_action( 'login_form_lostpassword', $redirect );
+			add_action( 'login_form_retrievepassword', $redirect );
+
+			// Hide the "Lost your password?" link.
+			add_action(
+				'login_head',
+				static function (): void {
+					echo '<style>#login #nav a[href*="lostpassword"] { display: none; }</style>';
+				}
+			);
 		}
 
 		if ( ! empty( $this->settings['hide_login_errors'] ) ) {

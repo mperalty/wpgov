@@ -2,14 +2,18 @@
 
 WP Governance is a file-based WordPress mu-plugin for locking down admin features, capabilities, UI, uploads, and other operational rules without writing settings into the database.
 
+## Requirements
+
+- PHP >= 8.1
+- WordPress >= 6.4
+
 ## Structure
 
 - `wp-governance.php` is the mu-plugin loader.
 - `wp-governance/` contains the governance modules and sample config.
-- `wp/` is a local WordPress install for manual testing in this workspace.
-- `tests/` contains the PHPUnit suite and the local WP test bootstrap.
+- `tests/` contains the PHPUnit suite and bootstrap.
 
-## Install As A Mu-Plugin
+## Installation
 
 Copy `wp-governance.php` and the `wp-governance/` directory into `wp-content/mu-plugins/`.
 
@@ -26,16 +30,6 @@ define( 'WP_GOVERNANCE_CONFIG', '/absolute/path/to/wp-governance-config.php' );
 ```
 
 The shipped sample config lives at `wp-governance/wp-governance-config.php`.
-
-## Local Workspace Setup
-
-This repo includes a local WordPress copy under `wp/` and a PHPUnit config under `tests/wp-tests-config.php`.
-
-- The local site config is `wp/wp-config.php`.
-- The workspace mu-plugin loader is `wp/wp-content/mu-plugins/wp-governance.php`.
-- PHPUnit uses the separate `wpgov_tests` database via `tests/bootstrap.php`.
-
-The local site is configured for development use in this workspace. PHPUnit does not rely on a browser-installed WordPress site.
 
 ## Policy Recipes
 
@@ -131,14 +125,6 @@ composer test
 composer analyze
 composer lint
 composer test:all
-```
-
-Direct Windows examples with the local Laragon PHP binary:
-
-```powershell
-& 'C:\laragon\bin\php\php-8.3.28-Win32-vs16-x64\php.exe' vendor\bin\phpunit
-& 'C:\laragon\bin\php\php-8.3.28-Win32-vs16-x64\php.exe' vendor\bin\phpstan analyse --no-progress --memory-limit=1G
-& 'C:\laragon\bin\php\php-8.3.28-Win32-vs16-x64\php.exe' bin\lint.php
 ```
 
 ## WP-CLI

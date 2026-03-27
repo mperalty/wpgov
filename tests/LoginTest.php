@@ -17,6 +17,9 @@ class LoginTest extends WP_UnitTestCase {
         remove_all_filters( 'show_password_fields' );
         remove_all_filters( 'login_errors' );
         remove_all_filters( 'logout_redirect' );
+        remove_all_actions( 'login_form_lostpassword' );
+        remove_all_actions( 'login_form_retrievepassword' );
+        remove_all_actions( 'login_head' );
 
         Config::reset();
         parent::tearDown();
@@ -28,6 +31,21 @@ class LoginTest extends WP_UnitTestCase {
 
         $this->assertFalse(apply_filters('allow_password_reset', true));
         $this->assertFalse(apply_filters('show_password_fields', true));
+    }
+
+    public function test_password_reset_blocks_lost_password_form(): void {
+        $settings = ['disable_password_reset' => true];
+        $this->load_module($settings);
+
+        $this->assertNotFalse(has_action('login_form_lostpassword'));
+        $this->assertNotFalse(has_action('login_form_retrievepassword'));
+    }
+
+    public function test_password_reset_hides_lost_password_link(): void {
+        $settings = ['disable_password_reset' => true];
+        $this->load_module($settings);
+
+        $this->assertNotFalse(has_action('login_head'));
     }
 
     public function test_password_reset_allowed_when_off(): void {
