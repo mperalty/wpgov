@@ -16,6 +16,7 @@ class UploadsTest extends WP_UnitTestCase {
 
     public function setUp(): void {
         parent::setUp();
+        wp_set_current_user( 0 );
         Config::reset();
     }
 
@@ -29,6 +30,7 @@ class UploadsTest extends WP_UnitTestCase {
             remove_all_filters( $hook );
         }
 
+        wp_set_current_user( 0 );
         Config::reset();
         parent::tearDown();
     }
@@ -178,6 +180,32 @@ class UploadsTest extends WP_UnitTestCase {
 
         $this->assertNotEmpty( $result['error'] );
         $this->assertStringContainsString( '2', $result['error'] );
+    }
+
+    public function test_unrestricted_users_bypass_mime_restrictions(): void {
+        $allowed = [
+            'jpg|jpeg|jpe' => 'image/jpeg',
+        ];
+
+        $user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+        wp_set_current_user( $user_id );
+
+        $this->load_module( $allowed );
+
+        $result = apply_filters( 'upload_mimes', wp_get_mime_types() );
+
+        $this->assertArrayHasKey( 'gif', $result );
+    }
+
+    public function test_unrestricted_users_bypass_upload_size_limits(): void {
+        $user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+        wp_set_current_user( $user_id );
+
+        $this->load_module( [], [ 'max_upload_size_mb' => 2 ] );
+
+        $result = apply_filters( 'upload_size_limit', 10 * MB_IN_BYTES );
+
+        $this->assertSame( 10 * MB_IN_BYTES, $result );
     }
 
     private function load_module( array $allowed, array $uploads = [] ): void {

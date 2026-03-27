@@ -10,12 +10,12 @@ WP Governance is a file-based WordPress mu-plugin for locking down admin feature
 - **Uploads** — restrict allowed MIME types and enforce a per-file size cap
 - **Content** — control revisions, autosave intervals, oEmbed, and emoji loading
 - **Login & auth** — disable password resets, mask login errors, and set a post-logout redirect
-- **Security hardening** — inject HTTP security headers, disable author archives, strip version strings, block file editing, and add noindex headers for staging environments
+- **Security hardening** — inject HTTP security headers on all paths (front-end, admin, login, and REST), disable author archives, strip WP core version strings from scripts (while preserving plugin/theme versions for cache busting), block file editing, and add noindex headers for staging environments
 - **Head cleanup** — remove RSD, WLW manifest, shortlinks, feed links, and REST API links from `<head>`
 - **Post types** — hide post types from the admin and selectively remove feature support (e.g. trackbacks, custom fields, comments)
 - **Locked options** — pin any `wp_options` value (permalink structure, date format, timezone, posts per page, etc.) from the config file so the database value never wins
 - **Custom rules** — register your own governance callbacks with hook, priority, and admin/front targeting
-- **Role-based bypass** — exempt a role (and above) from all restrictions so administrators keep full access
+- **Role-based bypass** — exempt a role (and above) from user-scoped governance like admin cleanup, capability denials, uploads, and password UI while global sitewide hardening still applies
 
 ## Why File-Based Governance
 
@@ -73,6 +73,28 @@ define( 'WP_GOVERNANCE_CONFIG', '/absolute/path/to/wp-governance-config.php' );
 ```
 
 The shipped sample config lives at `wp-governance/wp-governance-config.php`.
+
+Config loading is fail-safe — if the config file has a syntax error, is missing, or doesn't return an array, the plugin fails open (no governance rules are enforced) and logs a warning. Your site will never crash from a bad config file. Run `wp governance check` to validate.
+
+## Governance Scope
+
+Rules fall into two categories, and the `unrestricted_role` setting only bypasses one of them:
+
+**User-scoped governance** — bypassed by the unrestricted role:
+- Admin bar node removal, dashboard widget removal, admin notice suppression, admin footer text
+- Menu restrictions and capability denials
+- Upload MIME type and file size restrictions
+- Password reset and password field visibility
+- Block editor disabling
+
+**Sitewide hardening** — applies to everyone, including administrators:
+- Feature toggles like disabling XML-RPC, file editor, application passwords, REST API restrictions
+- Security headers, pingback removal, author archive disabling, version stripping
+- Head cleanup (RSD, WLW manifest, shortlinks, feed links)
+- Locked options, content restrictions (revisions, autosave, embeds, emojis)
+- Comments disabling, feed disabling, Customizer removal
+
+This means an administrator can still upload any file type and see all dashboard widgets, but XML-RPC stays off and security headers are always sent — even for admins.
 
 ## Environment-Specific Overrides
 
@@ -140,7 +162,7 @@ Pin settings so they can't drift across environments:
 ),
 ```
 
-Let editors bypass governance while lower roles stay restricted:
+Let editors bypass user-scoped governance while lower roles stay restricted:
 
 ```php
 'unrestricted_role' => 'editor',
@@ -209,8 +231,11 @@ Composer scripts:
 composer test
 composer analyze
 composer lint
+composer lint:syntax
 composer test:all
 ```
+
+`composer lint` runs the focused WPCS ruleset. `composer lint:syntax` keeps the recursive PHP syntax check. PHPUnit uses `tests/wp-tests-config.php`, which now honors `WP_TEST_DB_*`, `WP_TESTS_*`, and `WP_TEST_PHP_BINARY` environment variables so the suite can point at any disposable test database without editing the file.
 
 ## WP-CLI
 

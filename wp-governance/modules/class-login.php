@@ -2,6 +2,8 @@
 
 namespace WP_Governance\Modules;
 
+use WP_Governance\Config;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -19,16 +21,13 @@ class Login {
 
 	private function register(): void {
 		if ( ! empty( $this->settings['disable_password_reset'] ) ) {
-			add_filter( 'allow_password_reset', '__return_false' );
-			add_filter( 'show_password_fields', '__return_false' );
-
-			// Redirect lost password form back to login.
-			$redirect = static function (): void {
-				wp_safe_redirect( wp_login_url() );
-				exit;
-			};
-			add_action( 'login_form_lostpassword', $redirect );
-			add_action( 'login_form_retrievepassword', $redirect );
+			add_filter( 'allow_password_reset', array( $this, 'filter_allow_password_reset' ), 10, 2 );
+			add_filter(
+				'show_password_fields',
+				static function ( bool $show ): bool {
+					return Config::current_user_is_unrestricted() ? $show : false;
+				}
+			);
 
 			// Hide the "Lost your password?" link.
 			add_action(
@@ -67,5 +66,29 @@ class Login {
 				1
 			);
 		}
+	}
+
+	/**
+	 * Disable password resets for governed users while preserving them for unrestricted accounts.
+	 *
+	 * @param bool     $allow   Whether WordPress currently allows the reset.
+	 * @param int|bool $user_id Resolved user ID when available.
+	 * @return bool
+	 */
+	public function filter_allow_password_reset( bool $allow, $user_id = false ): bool {
+		if ( ! $allow ) {
+			return false;
+		}
+
+		if ( ! is_numeric( $user_id ) || (int) $user_id <= 0 ) {
+			return false;
+		}
+
+		$user = get_user_by( 'id', (int) $user_id );
+		if ( ! $user instanceof \WP_User ) {
+			return false;
+		}
+
+		return Config::user_is_unrestricted( $user );
 	}
 }

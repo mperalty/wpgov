@@ -58,7 +58,7 @@ return array(
 		// Disable application passwords (Settings → Users → Application Passwords).
 		'disable_application_passwords' => true,
 
-		// Remove default dashboard widgets. Fine-tune which ones via 'remove_dashboard_widgets' below.
+		// Remove all dashboard widgets for governed users. Fine-tune targeted removals via 'remove_dashboard_widgets' below.
 		'disable_dashboard_widgets'     => true,
 
 		// Force-disable user registration regardless of the Settings → General toggle.
@@ -235,7 +235,9 @@ return array(
 	),
 
 	// ─── Role-Based Bypass ──────────────────────────────────────────────────────
-	// Users with this role (or higher) bypass menu and capability restrictions.
+	// Users with this role (or higher) bypass user-scoped governance such as
+	// menus, admin bar cleanup, dashboard cleanup, uploads, and capability denials.
+	// Global sitewide hardening rules still apply to everyone.
 	// Set to 'administrator' so only admins are unrestricted.
 
 	'unrestricted_role'        => 'administrator',
@@ -288,7 +290,7 @@ return array(
 	// HTTP headers, enumeration protection, and other hardening measures.
 
 	'security'                 => array(
-		// Add custom HTTP security headers to all responses.
+		// Add custom HTTP security headers to front-end, admin, login, AJAX, and REST responses.
 		// Format: 'Header-Name' => 'header value'
 		'headers'                      => array(
 			// 'X-Content-Type-Options'  => 'nosniff',
@@ -302,8 +304,9 @@ return array(
 		// Also blocks the /wp/v2/users REST endpoint for unauthenticated requests.
 		'disable_author_archives'      => false,
 
-		// Remove version query strings from enqueued scripts and stylesheets
-		// (e.g., ?ver=6.4.2) to reduce information leakage.
+		// Remove version query strings from enqueued scripts and stylesheets only
+		// when they match the current WordPress core version. Theme/plugin asset
+		// versions are preserved for cache busting.
 		'hide_wp_version_from_scripts' => false,
 
 		// Remove the X-Pingback HTTP header from responses.
@@ -314,8 +317,9 @@ return array(
 		// want the security module alone to own this hardening rule.
 		'disable_file_editing'         => false,
 
-		// Add X-Robots-Tag: noindex, nofollow to all WordPress responses.
-		// Useful on staging/dev environments to prevent search-engine indexing.
+		// Add X-Robots-Tag: noindex, nofollow to front-end, admin, login, AJAX,
+		// and REST responses. Useful on staging/dev environments to prevent
+		// search-engine indexing.
 		'add_noindex_headers'          => false,
 	),
 

@@ -2,6 +2,8 @@
 
 namespace WP_Governance\Modules;
 
+use WP_Governance\Config;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -47,6 +49,10 @@ class Uploads {
 	 * @return array
 	 */
 	public function filter_mimes( array $mimes ): array {
+		if ( Config::current_user_is_unrestricted() ) {
+			return $mimes;
+		}
+
 		/**
 		 * Filter allowed MIME types before enforcement.
 		 *
@@ -70,6 +76,10 @@ class Uploads {
 	 * @return array
 	 */
 	public function enforce_file_type( array $data, string $file, string $filename, array $mimes, $real_mime ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		if ( Config::current_user_is_unrestricted() ) {
+			return $data;
+		}
+
 		if ( empty( $data['ext'] ) || empty( $data['type'] ) ) {
 			return $data;
 		}
@@ -102,6 +112,10 @@ class Uploads {
 	 * @return int
 	 */
 	public function limit_upload_size( int $limit ): int {
+		if ( Config::current_user_is_unrestricted() ) {
+			return $limit;
+		}
+
 		$configured = $this->max_upload_size_bytes();
 
 		if ( $configured <= 0 ) {
@@ -122,6 +136,10 @@ class Uploads {
 	 * @return array
 	 */
 	public function validate_upload_size( array $file ): array {
+		if ( Config::current_user_is_unrestricted() ) {
+			return $file;
+		}
+
 		$limit = $this->max_upload_size_bytes();
 
 		if ( $limit <= 0 || empty( $file['size'] ) || ! empty( $file['error'] ) ) {

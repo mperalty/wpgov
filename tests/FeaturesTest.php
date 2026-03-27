@@ -16,6 +16,7 @@ class FeaturesTest extends WP_UnitTestCase {
 
     public function setUp(): void {
         parent::setUp();
+        wp_set_current_user( 0 );
         Config::reset();
     }
 
@@ -30,6 +31,7 @@ class FeaturesTest extends WP_UnitTestCase {
             remove_all_actions( $hook );
         }
 
+        wp_set_current_user( 0 );
         Config::reset();
         parent::tearDown();
     }
@@ -107,12 +109,65 @@ class FeaturesTest extends WP_UnitTestCase {
         $this->assertFalse( apply_filters( 'use_block_editor_for_post_type', true, 'post' ) );
     }
 
+    public function test_block_editor_remains_available_for_unrestricted_users(): void {
+        $user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+        wp_set_current_user( $user_id );
+
+        $this->load_module_with( [ 'disable_block_editor' => true ] );
+
+        $this->assertTrue( apply_filters( 'use_block_editor_for_post', true ) );
+        $this->assertTrue( apply_filters( 'use_block_editor_for_post_type', true, 'post' ) );
+    }
+
     // ── Application Passwords ────────────────────────────────────
 
     public function test_application_passwords_disabled(): void {
         $this->load_module_with( [ 'disable_application_passwords' => true ] );
 
         $this->assertFalse( apply_filters( 'wp_is_application_passwords_available', true ) );
+    }
+
+    public function test_dashboard_widgets_feature_clears_all_dashboard_boxes(): void {
+        global $wp_meta_boxes;
+
+        $wp_meta_boxes['dashboard'] = [
+            'normal' => [
+                'core' => [
+                    'dashboard_right_now' => [ 'id' => 'dashboard_right_now' ],
+                ],
+            ],
+            'side' => [
+                'core' => [
+                    'dashboard_quick_press' => [ 'id' => 'dashboard_quick_press' ],
+                ],
+            ],
+        ];
+
+        $this->load_module_with( [ 'disable_dashboard_widgets' => true ] );
+        do_action( 'wp_dashboard_setup' );
+
+        $this->assertSame( [], $wp_meta_boxes['dashboard']['normal'] );
+        $this->assertSame( [], $wp_meta_boxes['dashboard']['side'] );
+    }
+
+    public function test_dashboard_widgets_feature_skips_unrestricted_users(): void {
+        global $wp_meta_boxes;
+
+        $user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+        wp_set_current_user( $user_id );
+
+        $wp_meta_boxes['dashboard'] = [
+            'normal' => [
+                'core' => [
+                    'dashboard_right_now' => [ 'id' => 'dashboard_right_now' ],
+                ],
+            ],
+        ];
+
+        $this->load_module_with( [ 'disable_dashboard_widgets' => true ] );
+        do_action( 'wp_dashboard_setup' );
+
+        $this->assertArrayHasKey( 'dashboard_right_now', $wp_meta_boxes['dashboard']['normal']['core'] );
     }
 
     // ── User Registration ────────────────────────────────────────

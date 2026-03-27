@@ -41,6 +41,17 @@ class ConfigTest extends WP_UnitTestCase {
         $this->filters_to_remove[] = [ 'wp_governance_config_path', $callback, 1 ];
     }
 
+    /**
+     * Helper: override the environment config path via filter and track for cleanup.
+     */
+    private function set_environment_config_path( string $path ): void {
+        $callback = static function () use ( $path ): string {
+            return $path;
+        };
+        add_filter( 'wp_governance_environment_config_path', $callback, 1 );
+        $this->filters_to_remove[] = [ 'wp_governance_environment_config_path', $callback, 1 ];
+    }
+
     // ── Loading ──────────────────────────────────────────────────
 
     public function test_loads_valid_config_file(): void {
@@ -78,6 +89,17 @@ class ConfigTest extends WP_UnitTestCase {
         $this->assertEmpty( $config['features'] );
     }
 
+    public function test_returns_defaults_for_syntax_error_file(): void {
+        $this->set_config_path( __DIR__ . '/fixtures/syntax-error-config.php' );
+        Config::reset();
+
+        $config = Config::get();
+
+        $this->assertIsArray( $config );
+        $this->assertArrayHasKey( 'features', $config );
+        $this->assertEmpty( $config['features'] );
+    }
+
     public function test_returns_defaults_for_empty_config(): void {
         $this->set_config_path( __DIR__ . '/fixtures/empty-config.php' );
         Config::reset();
@@ -102,6 +124,17 @@ class ConfigTest extends WP_UnitTestCase {
         $this->assertArrayHasKey( 'restricted_menu_slugs', $config );
         $this->assertArrayHasKey( 'uploads', $config );
         $this->assertSame( 'administrator', $config['unrestricted_role'] );
+    }
+
+    public function test_broken_environment_override_falls_back_to_base_config(): void {
+        $this->set_config_path( __DIR__ . '/fixtures/minimal-config.php' );
+        $this->set_environment_config_path( __DIR__ . '/fixtures/syntax-error-override.php' );
+        Config::reset();
+
+        $config = Config::get();
+
+        $this->assertTrue( $config['features']['disable_xmlrpc'] );
+        $this->assertSame( '', Config::environment_path() );
     }
 
     public function test_sample_defaults_load_the_shipped_config(): void {

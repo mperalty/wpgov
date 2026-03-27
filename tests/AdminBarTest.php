@@ -9,6 +9,7 @@ class AdminBarTest extends WP_UnitTestCase {
 
     public function setUp(): void {
         parent::setUp();
+        wp_set_current_user( 0 );
         Config::reset();
     }
 
@@ -18,6 +19,7 @@ class AdminBarTest extends WP_UnitTestCase {
         global $wp_admin_bar;
         $wp_admin_bar = null;
 
+        wp_set_current_user( 0 );
         Config::reset();
         parent::tearDown();
     }
@@ -54,5 +56,26 @@ class AdminBarTest extends WP_UnitTestCase {
         $this->assertNull($wp_admin_bar->get_node('wp-logo'));
         $this->assertNull($wp_admin_bar->get_node('comments'));
         $this->assertNotNull($wp_admin_bar->get_node('my-custom'));
+    }
+
+    public function test_unrestricted_users_keep_admin_bar_nodes(): void {
+        require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+        $user_id = self::factory()->user->create(['role' => 'administrator']);
+        wp_set_current_user($user_id);
+
+        global $wp_admin_bar;
+        $wp_admin_bar = new WP_Admin_Bar();
+        $wp_admin_bar->initialize();
+
+        $wp_admin_bar->add_node(['id' => 'wp-logo', 'title' => 'WP']);
+        $wp_admin_bar->add_node(['id' => 'comments', 'title' => 'Comments']);
+
+        require_once WP_GOVERNANCE_DIR . 'modules/class-admin-bar.php';
+        $module = new \WP_Governance\Modules\Admin_Bar(['wp-logo', 'comments'], Config::get());
+        $module->remove_nodes();
+
+        $this->assertNotNull($wp_admin_bar->get_node('wp-logo'));
+        $this->assertNotNull($wp_admin_bar->get_node('comments'));
     }
 }

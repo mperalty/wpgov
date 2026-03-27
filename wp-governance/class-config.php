@@ -174,7 +174,13 @@ class Config {
 			return self::$sample_defaults;
 		}
 
-		$defaults = include $path;
+		$defaults = self::include_php_file( $path, $error );
+		if ( null !== $error ) {
+			self::warn( "WP Governance: sample config at {$path} could not be loaded. {$error}" );
+			self::$sample_defaults = self::DEFAULTS;
+			return self::$sample_defaults;
+		}
+
 		if ( ! is_array( $defaults ) ) {
 			self::$sample_defaults = self::DEFAULTS;
 			return self::$sample_defaults;
@@ -257,36 +263,97 @@ class Config {
 	 * @return array Validated config or empty array on failure.
 	 */
 	private static function load( string $path ): array {
-		if ( ! is_readable( $path ) ) {
-			self::warn( "WP Governance: config file not found or not readable at {$path}" );
-			return self::DEFAULTS;
-		}
+		$inspection = self::inspect_path( $path );
+		$config     = $inspection['effective'];
 
-		$config = include $path;
+		foreach ( $inspection['errors'] as $error ) {
+			self::warn( 'WP Governance: ' . $error );
+		}
 
 		if ( ! is_array( $config ) ) {
-			self::warn( "WP Governance: config file at {$path} did not return an array." );
 			return self::DEFAULTS;
 		}
 
-		// Merge environment-specific override (e.g. config.local.php).
-		$env_path = self::resolve_environment_path( $path );
-		if ( '' !== $env_path ) {
-			self::$environment_path = $env_path;
-			$override               = include $env_path;
-
-			if ( is_array( $override ) ) {
-				$config = self::deep_merge( $config, $override );
-			} else {
-				self::warn( "WP Governance: environment override at {$env_path} did not return an array." );
-			}
-		}
+		self::$environment_path = $inspection['loaded_environment_path'];
 
 		foreach ( self::validation_errors( $config ) as $error ) {
 			self::warn( 'WP Governance: ' . $error );
 		}
 
 		return self::normalize( $config );
+	}
+
+	/**
+	 * Inspect raw config files without normalizing them.
+	 *
+	 * Used by runtime loading and the WP-CLI validation command so config files
+	 * can be parsed safely without fataling the request.
+	 *
+	 * @param string $path Absolute path to the base config file.
+	 * @return array{
+	 *     base:mixed,
+	 *     override:mixed,
+	 *     effective:array|null,
+	 *     environment_path:string,
+	 *     loaded_environment_path:string,
+	 *     errors:string[]
+	 * }
+	 */
+	public static function inspect_path( string $path ): array {
+		$inspection = array(
+			'base'                    => null,
+			'override'                => null,
+			'effective'               => null,
+			'environment_path'        => '',
+			'loaded_environment_path' => '',
+			'errors'                  => array(),
+		);
+
+		if ( ! file_exists( $path ) ) {
+			$inspection['errors'][] = 'Config file not found.';
+			return $inspection;
+		}
+
+		if ( ! is_readable( $path ) ) {
+			$inspection['errors'][] = 'Config file exists but is not readable. Check file permissions.';
+			return $inspection;
+		}
+
+		$inspection['base'] = self::include_php_file( $path, $error );
+		if ( null !== $error ) {
+			$inspection['errors'][] = "Config file could not be loaded. {$error}";
+			return $inspection;
+		}
+
+		if ( ! is_array( $inspection['base'] ) ) {
+			$inspection['errors'][] = 'Config file does not return a PHP array.';
+			return $inspection;
+		}
+
+		$inspection['effective'] = $inspection['base'];
+
+		$env_path = self::resolve_environment_path( $path );
+		if ( '' === $env_path ) {
+			return $inspection;
+		}
+
+		$inspection['environment_path'] = $env_path;
+		$inspection['override']         = self::include_php_file( $env_path, $error );
+
+		if ( null !== $error ) {
+			$inspection['errors'][] = "Environment override could not be loaded. {$error}";
+			return $inspection;
+		}
+
+		if ( ! is_array( $inspection['override'] ) ) {
+			$inspection['errors'][] = 'Environment override does not return a PHP array.';
+			return $inspection;
+		}
+
+		$inspection['loaded_environment_path'] = $env_path;
+		$inspection['effective']               = self::deep_merge( $inspection['effective'], $inspection['override'] );
+
+		return $inspection;
 	}
 
 	/**
@@ -1285,6 +1352,29 @@ class Config {
 		}
 
 		return $default;
+	}
+
+	/**
+	 * Safely include a PHP config file and capture parse/runtime errors.
+	 *
+	 * @param string      $path  Absolute file path.
+	 * @param string|null $error Populated with an error message on failure.
+	 * @return mixed
+	 */
+	private static function include_php_file( string $path, ?string &$error = null ) {
+		$error = null;
+
+		try {
+			return include $path;
+		} catch ( \Throwable $throwable ) {
+			$error = sprintf(
+				'%s: %s',
+				$throwable::class,
+				$throwable->getMessage()
+			);
+
+			return null;
+		}
 	}
 
 	/**

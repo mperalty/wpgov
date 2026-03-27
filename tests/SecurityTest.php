@@ -9,6 +9,7 @@ class SecurityTest extends WP_UnitTestCase {
 
     public function setUp(): void {
         parent::setUp();
+        wp_set_current_user( 0 );
         Config::reset();
     }
 
@@ -17,8 +18,12 @@ class SecurityTest extends WP_UnitTestCase {
         remove_all_filters( 'style_loader_src' );
         remove_all_filters( 'script_loader_src' );
         remove_all_filters( 'rest_endpoints' );
+        remove_all_filters( 'rest_post_dispatch' );
         remove_all_actions( 'template_redirect' );
+        remove_all_actions( 'admin_init' );
+        remove_all_actions( 'login_init' );
 
+        wp_set_current_user( 0 );
         Config::reset();
         parent::tearDown();
     }
@@ -29,7 +34,7 @@ class SecurityTest extends WP_UnitTestCase {
         require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
         new \WP_Governance\Modules\Security($settings, Config::get());
 
-        $url    = 'https://example.com/wp-includes/js/jquery.js?ver=3.7.1';
+        $url    = 'https://example.com/wp-includes/js/jquery.js?ver=' . get_bloginfo( 'version' );
         $result = apply_filters('script_loader_src', $url);
 
         $this->assertStringNotContainsString('ver=', $result);
@@ -42,10 +47,22 @@ class SecurityTest extends WP_UnitTestCase {
         require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
         new \WP_Governance\Modules\Security($settings, Config::get());
 
-        $url    = 'https://example.com/wp-includes/js/jquery.js?ver=3.7.1';
+        $url    = 'https://example.com/wp-includes/js/jquery.js?ver=1.2.3';
         $result = apply_filters('script_loader_src', $url);
 
         $this->assertStringContainsString('ver=', $result);
+    }
+
+    public function test_non_core_asset_versions_are_preserved(): void {
+        $settings = ['hide_wp_version_from_scripts' => true];
+
+        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
+        new \WP_Governance\Modules\Security($settings, Config::get());
+
+        $url    = 'https://example.com/wp-content/plugins/example/app.js?ver=2026.03.27';
+        $result = apply_filters('script_loader_src', $url);
+
+        $this->assertSame($url, $result);
     }
 
     public function test_pingback_header_removed(): void {
@@ -150,6 +167,45 @@ class SecurityTest extends WP_UnitTestCase {
         $headers = apply_filters('wp_headers', [
             'X-Pingback' => 'https://example.com/xmlrpc.php',
         ]);
+
+        $this->assertSame('DENY', $headers['X-Frame-Options']);
+        $this->assertSame('noindex, nofollow', $headers['X-Robots-Tag']);
+        $this->assertArrayNotHasKey('X-Pingback', $headers);
+    }
+
+    public function test_direct_header_hooks_registered_when_needed(): void {
+        $settings = [
+            'headers' => [
+                'X-Frame-Options' => 'DENY',
+            ],
+        ];
+
+        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
+        $module = new \WP_Governance\Modules\Security($settings, Config::get());
+
+        $this->assertNotFalse(has_action('admin_init', [$module, 'send_direct_headers']));
+        $this->assertNotFalse(has_action('login_init', [$module, 'send_direct_headers']));
+        $this->assertNotFalse(has_filter('rest_post_dispatch', [$module, 'filter_rest_response_headers']));
+    }
+
+    public function test_rest_response_headers_are_filtered(): void {
+        $settings = [
+            'headers' => [
+                'X-Frame-Options' => 'DENY',
+            ],
+            'add_noindex_headers'    => true,
+            'remove_pingback_header' => true,
+        ];
+
+        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
+        $module = new \WP_Governance\Modules\Security($settings, Config::get());
+
+        $response = new WP_HTTP_Response(null, 200, [
+            'X-Pingback' => 'https://example.com/xmlrpc.php',
+        ]);
+
+        $response = $module->filter_rest_response_headers($response);
+        $headers  = $response->get_headers();
 
         $this->assertSame('DENY', $headers['X-Frame-Options']);
         $this->assertSame('noindex, nofollow', $headers['X-Robots-Tag']);

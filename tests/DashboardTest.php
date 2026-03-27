@@ -9,12 +9,14 @@ class DashboardTest extends WP_UnitTestCase {
 
     public function setUp(): void {
         parent::setUp();
+        wp_set_current_user( 0 );
         Config::reset();
     }
 
     public function tearDown(): void {
         remove_all_actions( 'wp_dashboard_setup' );
 
+        wp_set_current_user( 0 );
         Config::reset();
         parent::tearDown();
     }
@@ -38,5 +40,20 @@ class DashboardTest extends WP_UnitTestCase {
 
         $priority = has_action('wp_dashboard_setup', [$module, 'remove_widgets']);
         $this->assertSame(999, $priority);
+    }
+
+    public function test_unrestricted_users_keep_dashboard_widgets(): void {
+        global $wp_meta_boxes;
+
+        $user_id = self::factory()->user->create(['role' => 'administrator']);
+        wp_set_current_user($user_id);
+
+        $wp_meta_boxes['dashboard']['side']['core']['dashboard_quick_press'] = ['id' => 'dashboard_quick_press'];
+
+        require_once WP_GOVERNANCE_DIR . 'modules/class-dashboard.php';
+        $module = new \WP_Governance\Modules\Dashboard(['dashboard_quick_press'], Config::get());
+        $module->remove_widgets();
+
+        $this->assertArrayHasKey('dashboard_quick_press', $wp_meta_boxes['dashboard']['side']['core']);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace WP_Governance\Modules;
 
+use WP_Governance\Config;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,8 +22,20 @@ class Admin_Footer {
 	private function register(): void {
 		// remove_footer takes precedence — skip individual text replacements.
 		if ( ! empty( $this->settings['remove_footer'] ) ) {
-			add_filter( 'admin_footer_text', '__return_empty_string', 999 );
-			add_filter( 'update_footer', '__return_empty_string', 999 );
+			add_filter(
+				'admin_footer_text',
+				static function ( string $text ): string {
+					return Config::current_user_is_unrestricted() ? $text : '';
+				},
+				999
+			);
+			add_filter(
+				'update_footer',
+				static function ( string $text ): string {
+					return Config::current_user_is_unrestricted() ? $text : '';
+				},
+				999
+			);
 			return;
 		}
 
@@ -29,8 +43,8 @@ class Admin_Footer {
 			$text = $this->settings['left_text'];
 			add_filter(
 				'admin_footer_text',
-				static function () use ( $text ): string {
-					return wp_kses_post( $text );
+				static function ( string $original ) use ( $text ): string {
+					return Config::current_user_is_unrestricted() ? $original : wp_kses_post( $text );
 				},
 				999
 			);
@@ -40,8 +54,8 @@ class Admin_Footer {
 			$text = $this->settings['right_text'];
 			add_filter(
 				'update_footer',
-				static function () use ( $text ): string {
-					return wp_kses_post( $text );
+				static function ( string $original ) use ( $text ): string {
+					return Config::current_user_is_unrestricted() ? $original : wp_kses_post( $text );
 				},
 				999
 			);

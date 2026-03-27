@@ -254,25 +254,14 @@ class CLI extends \WP_CLI_Command {
 		WP_CLI::log( 'Checking config: ' . $path );
 		WP_CLI::log( '' );
 
-		// Existence.
-		if ( ! file_exists( $path ) ) {
-			WP_CLI::error( 'Config file not found.' );
-		}
-
-		// Readable.
-		if ( ! is_readable( $path ) ) {
-			WP_CLI::error( 'Config file exists but is not readable. Check file permissions.' );
-		}
-
-		// Returns array.
-		$config = include $path;
-		if ( ! is_array( $config ) ) {
-			WP_CLI::error( 'Config file does not return a PHP array.' );
+		$inspection = Config::inspect_path( $path );
+		if ( ! empty( $inspection['errors'] ) ) {
+			WP_CLI::error( implode( "\n", $inspection['errors'] ) );
 		}
 
 		WP_CLI::success( 'File exists and returns a valid array.' );
 
-		$errors = Config::validation_errors( $config );
+		$errors = Config::validation_errors( $inspection['effective'] ?? array() );
 
 		if ( empty( array_filter( $errors, static fn( string $message ): bool => str_starts_with( $message, 'Unknown config keys:' ) ) ) ) {
 			WP_CLI::success( 'All config keys are recognized.' );
@@ -877,7 +866,7 @@ class CLI extends \WP_CLI_Command {
 			);
 		}
 
-		if ( ! isset( $content['revision_limit'] ) || null === $content['revision_limit'] ) {
+		if ( ! array_key_exists( 'revision_limit', $content ) || null === $content['revision_limit'] ) {
 			$findings[] = array(
 				'severity' => 'low',
 				'category' => 'Content',

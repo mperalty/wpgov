@@ -74,12 +74,12 @@ class Features {
 		}
 
 		if ( $this->on( 'disable_admin_email_check' ) ) {
-			add_filter( 'admin_email_check_interval', '__return_false' );
+			add_filter( 'admin_email_check_interval', array( $this, 'filter_admin_email_check_interval' ) );
 		}
 
 		if ( $this->on( 'disable_auto_update_ui' ) ) {
-			add_filter( 'plugins_auto_update_enabled', '__return_false' );
-			add_filter( 'themes_auto_update_enabled', '__return_false' );
+			add_filter( 'plugins_auto_update_enabled', array( $this, 'filter_auto_update_ui' ) );
+			add_filter( 'themes_auto_update_enabled', array( $this, 'filter_auto_update_ui' ) );
 		}
 
 		if ( $this->on( 'disable_comments' ) ) {
@@ -87,12 +87,16 @@ class Features {
 		}
 
 		if ( $this->on( 'disable_block_editor' ) ) {
-			add_filter( 'use_block_editor_for_post', '__return_false' );
-			add_filter( 'use_block_editor_for_post_type', '__return_false' );
+			add_filter( 'use_block_editor_for_post', array( $this, 'filter_block_editor_usage' ) );
+			add_filter( 'use_block_editor_for_post_type', array( $this, 'filter_block_editor_usage' ) );
 		}
 
 		if ( $this->on( 'disable_application_passwords' ) ) {
-			add_filter( 'wp_is_application_passwords_available', '__return_false' );
+			add_filter( 'wp_is_application_passwords_available', array( $this, 'filter_application_password_availability' ) );
+		}
+
+		if ( $this->on( 'disable_dashboard_widgets' ) ) {
+			$this->disable_dashboard_widgets();
 		}
 
 		if ( $this->on( 'disable_user_registration' ) ) {
@@ -219,36 +223,51 @@ class Features {
 	 * Remove the Customizer (Appearance → Customize).
 	 */
 	private function disable_customizer(): void {
-		add_action(
-			'admin_menu',
-			static function (): void {
-				remove_submenu_page( 'themes.php', 'customize.php' );
-			}
-		);
+		add_action( 'admin_menu', array( $this, 'remove_customizer_menu' ) );
+		add_action( 'admin_init', array( $this, 'block_customizer_access' ) );
+		add_action( 'wp_before_admin_bar_render', array( $this, 'remove_customizer_admin_bar_node' ) );
+	}
 
-		// Block direct access.
-		add_action(
-			'admin_init',
-			static function (): void {
-				global $pagenow;
-				if ( 'customize.php' === $pagenow ) {
-					wp_safe_redirect( admin_url() );
-					exit;
-				}
-			}
-		);
+	/**
+	 * Remove the Customizer submenu for governed users.
+	 */
+	public function remove_customizer_menu(): void {
+		if ( Config::current_user_is_unrestricted() ) {
+			return;
+		}
 
-		// Remove from admin bar.
-		add_action(
-			'wp_before_admin_bar_render',
-			static function (): void {
-				global $wp_admin_bar;
+		remove_submenu_page( 'themes.php', 'customize.php' );
+	}
 
-				if ( $wp_admin_bar instanceof \WP_Admin_Bar ) {
-					$wp_admin_bar->remove_node( 'customize' );
-				}
-			}
-		);
+	/**
+	 * Redirect governed users away from direct Customizer access.
+	 */
+	public function block_customizer_access(): void {
+		if ( Config::current_user_is_unrestricted() ) {
+			return;
+		}
+
+		global $pagenow;
+
+		if ( 'customize.php' === $pagenow ) {
+			wp_safe_redirect( admin_url() );
+			exit;
+		}
+	}
+
+	/**
+	 * Remove the Customizer admin-bar node for governed users.
+	 */
+	public function remove_customizer_admin_bar_node(): void {
+		if ( Config::current_user_is_unrestricted() ) {
+			return;
+		}
+
+		global $wp_admin_bar;
+
+		if ( $wp_admin_bar instanceof \WP_Admin_Bar ) {
+			$wp_admin_bar->remove_node( 'customize' );
+		}
 	}
 
 	/**
@@ -282,6 +301,32 @@ class Features {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Remove all dashboard widgets for governed users.
+	 */
+	private function disable_dashboard_widgets(): void {
+		add_action( 'wp_dashboard_setup', array( $this, 'clear_dashboard_widgets' ), 999 );
+	}
+
+	/**
+	 * Remove every dashboard meta box, including third-party widgets.
+	 */
+	public function clear_dashboard_widgets(): void {
+		if ( Config::current_user_is_unrestricted() ) {
+			return;
+		}
+
+		global $wp_meta_boxes;
+
+		if ( empty( $wp_meta_boxes['dashboard'] ) || ! is_array( $wp_meta_boxes['dashboard'] ) ) {
+			return;
+		}
+
+		foreach ( array_keys( $wp_meta_boxes['dashboard'] ) as $context ) {
+			$wp_meta_boxes['dashboard'][ $context ] = array();
+		}
 	}
 
 	/**
@@ -394,6 +439,37 @@ class Features {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Keep the admin email check enabled for unrestricted users.
+	 *
+	 * @param mixed $interval Current interval value.
+	 * @return mixed
+	 */
+	public function filter_admin_email_check_interval( $interval ) {
+		return Config::current_user_is_unrestricted() ? $interval : false;
+	}
+
+	/**
+	 * Disable block editor usage for governed users only.
+	 */
+	public function filter_block_editor_usage( bool $use_block_editor ): bool {
+		return Config::current_user_is_unrestricted() ? $use_block_editor : false;
+	}
+
+	/**
+	 * Disable the auto-update UI for governed users only.
+	 */
+	public function filter_auto_update_ui( bool $enabled ): bool {
+		return Config::current_user_is_unrestricted() ? $enabled : false;
+	}
+
+	/**
+	 * Disable application passwords for governed users only.
+	 */
+	public function filter_application_password_availability( bool $available ): bool {
+		return Config::current_user_is_unrestricted() ? $available : false;
 	}
 
 	/**

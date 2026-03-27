@@ -119,6 +119,14 @@ class CLITest extends WP_UnitTestCase {
 		$this->filters_to_remove[] = [ 'wp_governance_config_path', $callback, 1 ];
 	}
 
+	private function set_environment_config_path( string $path ): void {
+		$callback = static function () use ( $path ): string {
+			return $path;
+		};
+		add_filter( 'wp_governance_environment_config_path', $callback, 1 );
+		$this->filters_to_remove[] = [ 'wp_governance_environment_config_path', $callback, 1 ];
+	}
+
 	public function test_diff_uses_sample_defaults_as_the_clean_baseline(): void {
 		$this->set_config_path( WP_GOVERNANCE_DIR . 'wp-governance-config.php' );
 		Config::reset();
@@ -432,6 +440,29 @@ class CLITest extends WP_UnitTestCase {
 
 		$this->expectException( \RuntimeException::class );
 		$this->expectExceptionMessage( 'Config file does not return a PHP array.' );
+
+		$cli = new \WP_Governance\CLI();
+		$cli->check( [], [] );
+	}
+
+	public function test_check_errors_for_syntax_error_config(): void {
+		$this->set_config_path( __DIR__ . '/fixtures/syntax-error-config.php' );
+		Config::reset();
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Config file could not be loaded.' );
+
+		$cli = new \WP_Governance\CLI();
+		$cli->check( [], [] );
+	}
+
+	public function test_check_errors_for_broken_environment_override(): void {
+		$this->set_config_path( __DIR__ . '/fixtures/minimal-config.php' );
+		$this->set_environment_config_path( __DIR__ . '/fixtures/syntax-error-override.php' );
+		Config::reset();
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Environment override could not be loaded.' );
 
 		$cli = new \WP_Governance\CLI();
 		$cli->check( [], [] );

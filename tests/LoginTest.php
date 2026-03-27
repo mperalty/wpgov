@@ -9,6 +9,7 @@ class LoginTest extends WP_UnitTestCase {
 
     public function setUp(): void {
         parent::setUp();
+        wp_set_current_user( 0 );
         Config::reset();
     }
 
@@ -21,6 +22,7 @@ class LoginTest extends WP_UnitTestCase {
         remove_all_actions( 'login_form_retrievepassword' );
         remove_all_actions( 'login_head' );
 
+        wp_set_current_user( 0 );
         Config::reset();
         parent::tearDown();
     }
@@ -29,16 +31,16 @@ class LoginTest extends WP_UnitTestCase {
         $settings = ['disable_password_reset' => true];
         $this->load_module($settings);
 
-        $this->assertFalse(apply_filters('allow_password_reset', true));
+        $this->assertFalse(apply_filters('allow_password_reset', true, 0));
         $this->assertFalse(apply_filters('show_password_fields', true));
     }
 
-    public function test_password_reset_blocks_lost_password_form(): void {
+    public function test_password_reset_allows_unrestricted_accounts(): void {
+        $user_id = self::factory()->user->create(['role' => 'administrator']);
         $settings = ['disable_password_reset' => true];
         $this->load_module($settings);
 
-        $this->assertNotFalse(has_action('login_form_lostpassword'));
-        $this->assertNotFalse(has_action('login_form_retrievepassword'));
+        $this->assertTrue(apply_filters('allow_password_reset', true, $user_id));
     }
 
     public function test_password_reset_hides_lost_password_link(): void {
@@ -52,7 +54,17 @@ class LoginTest extends WP_UnitTestCase {
         $settings = ['disable_password_reset' => false];
         $this->load_module($settings);
 
-        $this->assertTrue(apply_filters('allow_password_reset', true));
+        $this->assertTrue(apply_filters('allow_password_reset', true, 0));
+    }
+
+    public function test_password_fields_remain_visible_for_unrestricted_users(): void {
+        $user_id = self::factory()->user->create(['role' => 'administrator']);
+        wp_set_current_user($user_id);
+
+        $settings = ['disable_password_reset' => true];
+        $this->load_module($settings);
+
+        $this->assertTrue(apply_filters('show_password_fields', true));
     }
 
     public function test_login_errors_hidden(): void {

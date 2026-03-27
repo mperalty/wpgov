@@ -2,6 +2,8 @@
 
 namespace WP_Governance\Modules;
 
+use WP_Governance\Config;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -22,6 +24,10 @@ class Admin_Bar {
 	}
 
 	public function remove_nodes(): void {
+		if ( Config::current_user_is_unrestricted() ) {
+			return;
+		}
+
 		global $wp_admin_bar;
 
 		if ( ! $wp_admin_bar instanceof \WP_Admin_Bar ) {

@@ -29,10 +29,14 @@ class Security {
 	}
 
 	private function register(): void {
-		// Single consolidated wp_headers filter for custom headers, noindex, and pingback removal.
+		// Front-end headers go through wp_headers. Admin, login, AJAX, and REST
+		// need separate hooks because they do not consistently use that filter.
 		$needs_header_filter = ! empty( $this->settings['headers'] ) || $this->add_noindex || $this->remove_pingback;
 		if ( $needs_header_filter ) {
 			add_filter( 'wp_headers', array( $this, 'filter_headers' ), 999 );
+			add_action( 'admin_init', array( $this, 'send_direct_headers' ), 0 );
+			add_action( 'login_init', array( $this, 'send_direct_headers' ), 0 );
+			add_filter( 'rest_post_dispatch', array( $this, 'filter_rest_response_headers' ), 999 );
 		}
 
 		// Disable author archive enumeration (prevents ?author=1 user discovery).
@@ -81,7 +85,87 @@ class Security {
 	 * @return array
 	 */
 	public function filter_headers( array $headers ): array {
-		// Custom security headers.
+		return $this->apply_header_policy( $headers );
+	}
+
+	/**
+	 * Remove version query strings from enqueued script/style URLs.
+	 */
+	public static function strip_version_query( string $src ): string {
+		$query = wp_parse_url( $src, PHP_URL_QUERY );
+		if ( ! is_string( $query ) || '' === $query ) {
+			return $src;
+		}
+
+		parse_str( $query, $args );
+		$version = (string) ( $args['ver'] ?? '' );
+
+		if ( '' !== $version && $version === self::current_wp_version() ) {
+			$src = remove_query_arg( 'ver', $src );
+		}
+
+		return $src;
+	}
+
+	/**
+	 * Send configured headers directly for response types that bypass wp_headers.
+	 */
+	public function send_direct_headers(): void {
+		foreach ( $this->build_header_map() as $name => $value ) {
+			header( sprintf( '%s: %s', $name, $value ), true );
+		}
+
+		if ( $this->remove_pingback && function_exists( 'header_remove' ) ) {
+			header_remove( 'X-Pingback' );
+		}
+	}
+
+	/**
+	 * Add configured headers to REST responses.
+	 *
+	 * @param \WP_HTTP_Response $response Current REST response.
+	 * @return \WP_HTTP_Response
+	 */
+	public function filter_rest_response_headers( \WP_HTTP_Response $response ): \WP_HTTP_Response {
+		foreach ( $this->build_header_map() as $name => $value ) {
+			$response->header( $name, $value );
+		}
+
+		if ( $this->remove_pingback ) {
+			$headers = $response->get_headers();
+			unset( $headers['X-Pingback'] );
+			$response->set_headers( $headers );
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Apply the configured header policy to a header map.
+	 *
+	 * @param array $headers Existing headers.
+	 * @return array
+	 */
+	private function apply_header_policy( array $headers ): array {
+		foreach ( $this->build_header_map() as $name => $value ) {
+			$headers[ $name ] = $value;
+		}
+
+		if ( $this->remove_pingback ) {
+			unset( $headers['X-Pingback'] );
+		}
+
+		return $headers;
+	}
+
+	/**
+	 * Build the sanitized header map configured for this site.
+	 *
+	 * @return array<string, string>
+	 */
+	private function build_header_map(): array {
+		$headers = array();
+
 		foreach ( (array) ( $this->settings['headers'] ?? array() ) as $name => $value ) {
 			$name  = $this->sanitize_header_name( $name );
 			$value = $this->sanitize_header_value( $value );
@@ -93,27 +177,24 @@ class Security {
 			$headers[ $name ] = $value;
 		}
 
-		// Noindex header.
 		if ( $this->add_noindex ) {
 			$headers['X-Robots-Tag'] = 'noindex, nofollow';
-		}
-
-		// Remove pingback header.
-		if ( $this->remove_pingback ) {
-			unset( $headers['X-Pingback'] );
 		}
 
 		return $headers;
 	}
 
 	/**
-	 * Remove version query strings from enqueued script/style URLs.
+	 * Get the current WordPress version used for core asset cache busting.
 	 */
-	public static function strip_version_query( string $src ): string {
-		if ( str_contains( $src, '?ver=' ) || str_contains( $src, '&ver=' ) ) {
-			$src = remove_query_arg( 'ver', $src );
+	private static function current_wp_version(): string {
+		global $wp_version;
+
+		if ( is_string( $wp_version ) && '' !== $wp_version ) {
+			return $wp_version;
 		}
-		return $src;
+
+		return get_bloginfo( 'version' );
 	}
 
 	/**

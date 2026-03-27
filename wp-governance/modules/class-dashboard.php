@@ -2,6 +2,8 @@
 
 namespace WP_Governance\Modules;
 
+use WP_Governance\Config;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -25,6 +27,10 @@ class Dashboard {
 	 * Remove listed dashboard widgets.
 	 */
 	public function remove_widgets(): void {
+		if ( Config::current_user_is_unrestricted() ) {
+			return;
+		}
+
 		// Map of widget ID => [context, priority] for core dashboard widgets.
 		$core_map = array(
 			'dashboard_quick_press'     => array( 'side', 'core' ),
@@ -40,7 +46,7 @@ class Dashboard {
 
 		foreach ( $this->widgets as $widget_id ) {
 			if ( isset( $core_map[ $widget_id ] ) ) {
-				[$context, $priority] = $core_map[ $widget_id ];
+				$context = $core_map[ $widget_id ][0];
 				remove_meta_box( $widget_id, 'dashboard', $context );
 			} else {
 				// Try both contexts for unknown/third-party widgets.
