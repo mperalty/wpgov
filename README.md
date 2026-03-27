@@ -2,6 +2,30 @@
 
 WP Governance is a file-based WordPress mu-plugin for locking down admin features, capabilities, UI, uploads, and other operational rules without writing settings into the database.
 
+## What You Can Control
+
+- **Feature toggles** — disable XML-RPC, the block editor, comments, search, RSS feeds, the Customizer, widgets, application passwords, user registration, WP Cron, and more with a single boolean
+- **Admin UI** — remove admin bar nodes, dashboard widgets, menu pages, and admin footer text; lock the permalink structure and tagline
+- **Capabilities** — deny specific capabilities per role at runtime without touching the database
+- **Uploads** — restrict allowed MIME types and enforce a per-file size cap
+- **Content** — control revisions, autosave intervals, oEmbed, and emoji loading
+- **Login & auth** — disable password resets, mask login errors, and set a post-logout redirect
+- **Security hardening** — inject HTTP security headers, disable author archives, strip version strings, block file editing, and add noindex headers for staging environments
+- **Head cleanup** — remove RSD, WLW manifest, shortlinks, feed links, and REST API links from `<head>`
+- **Post types** — hide post types from the admin and selectively remove feature support (e.g. trackbacks, custom fields, comments)
+- **Custom rules** — register your own governance callbacks with hook, priority, and admin/front targeting
+- **Role-based bypass** — exempt a role (and above) from all restrictions so administrators keep full access
+
+## Why File-Based Governance
+
+Because the entire policy is a single PHP file, you can:
+
+- **Version-control your policy** — track every change in git with full history and code review
+- **Deploy to many sites at once** — push the same config across dozens or hundreds of client sites via your deployment pipeline, CI/CD, or configuration management
+- **Enforce consistency** — guarantee that every site in a fleet shares the same security posture, upload rules, and UI restrictions regardless of what any individual admin toggles in the dashboard
+- **Avoid database drift** — settings live in code, not in `wp_options` rows that can be changed through the admin, lost during migrations, or diverge between environments
+- **Onboard new sites instantly** — drop the mu-plugin and config file in, and the full policy is active on the next page load with nothing to configure through the UI
+
 ## Requirements
 
 - PHP >= 8.1
