@@ -11,13 +11,32 @@ defined( 'ABSPATH' ) || exit;
  */
 class Uploads {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<string, string>
+	 */
 	private array $allowed;
 
+	/**
+	 * @var array
+	 * @phpstan-var array<string, mixed>
+	 */
 	private array $settings;
 
-	/** @var array<string, string>|null */
+	/**
+	 * @var array|null
+	 * @phpstan-var array<string, string>|null
+	 */
 	private ?array $allowed_lookup = null;
 
+	/**
+	 * @param array $allowed Allowed MIME map.
+	 * @phpstan-param array<string, string> $allowed Allowed MIME map.
+	 * @psalm-param array $allowed Allowed MIME map.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $allowed, array $config ) {
 		$this->allowed  = $allowed;
@@ -46,7 +65,11 @@ class Uploads {
 	 * Replace the allowed MIME types list.
 	 *
 	 * @param array $mimes Default allowed MIME types.
+	 * @phpstan-param array<string, string> $mimes Default allowed MIME types.
+	 * @psalm-param array $mimes Default allowed MIME types.
 	 * @return array
+	 * @phpstan-return array<string, string>
+	 * @psalm-return array
 	 */
 	public function filter_mimes( array $mimes ): array {
 		if ( Config::current_user_is_unrestricted() ) {
@@ -68,12 +91,18 @@ class Uploads {
 	 * This only narrows what core has already accepted. It never widens the
 	 * file types allowed by WordPress.
 	 *
-	 * @param array       $data     File type data from WordPress.
-	 * @param string      $file     Temporary uploaded file path.
-	 * @param string      $filename Original filename.
-	 * @param array       $mimes    Allowed MIME types.
+	 * @param array $data File type data from WordPress.
+	 * @phpstan-param array<string, mixed> $data File type data from WordPress.
+	 * @psalm-param array $data File type data from WordPress.
+	 * @param string $file Temporary uploaded file path.
+	 * @param string $filename Original filename.
+	 * @param array $mimes Allowed MIME types.
+	 * @phpstan-param array<string, string> $mimes Allowed MIME types.
+	 * @psalm-param array $mimes Allowed MIME types.
 	 * @param string|bool $real_mime Real MIME type when available.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	public function enforce_file_type( array $data, string $file, string $filename, array $mimes, $real_mime ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( Config::current_user_is_unrestricted() ) {
@@ -133,7 +162,11 @@ class Uploads {
 	 * Reject oversized uploads before WordPress moves them into place.
 	 *
 	 * @param array $file Uploaded file data.
+	 * @phpstan-param array<string, mixed> $file Uploaded file data.
+	 * @psalm-param array $file Uploaded file data.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	public function validate_upload_size( array $file ): array {
 		if ( Config::current_user_is_unrestricted() ) {
@@ -152,7 +185,7 @@ class Uploads {
 
 		$file['error'] = sprintf(
 			/* translators: %s: upload size limit in MB */
-			__( 'This file exceeds the governance upload limit of %s MB.' ),
+			__( 'This file exceeds the governance upload limit of %s MB.', 'wp-governance' ),
 			rtrim( rtrim( number_format_i18n( $limit / MB_IN_BYTES, 2 ), '0' ), '.' )
 		);
 
@@ -182,7 +215,9 @@ class Uploads {
 	/**
 	 * Expand extension groups like jpg|jpeg|jpe into direct lookups.
 	 *
-	 * @return array<string, string>
+	 * @return array
+	 * @phpstan-return array<string, string>
+	 * @psalm-return array
 	 */
 	private function normalized_allowed_mimes(): array {
 		if ( null !== $this->allowed_lookup ) {
@@ -211,7 +246,11 @@ class Uploads {
 	 * Return a rejected file-type payload compatible with WordPress core.
 	 *
 	 * @param array $data Existing file type data.
+	 * @phpstan-param array<string, mixed> $data Existing file type data.
+	 * @psalm-param array $data Existing file type data.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private function rejected_file_type( array $data ): array {
 		$data['ext']  = false;

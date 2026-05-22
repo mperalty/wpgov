@@ -11,8 +11,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class Features {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<string, bool>
+	 */
 	private array $features;
 
+	/**
+	 * @param array $features Feature flags.
+	 * @phpstan-param array<string, bool> $features Feature flags.
+	 * @psalm-param array $features Feature flags.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $features, array $config ) {
 		$this->features = $features;
@@ -38,14 +50,14 @@ class Features {
 		if ( $this->on( 'restrict_rest_api' ) ) {
 			add_filter(
 				'rest_authentication_errors',
-				static function ( $result ) {
+				static function ( mixed $result ): mixed {
 					if ( true === $result || is_wp_error( $result ) ) {
 						return $result;
 					}
 					if ( ! is_user_logged_in() ) {
 						return new \WP_Error(
 							'rest_not_logged_in',
-							__( 'REST API access is restricted to authenticated users.' ),
+							__( 'REST API access is restricted to authenticated users.', 'wp-governance' ),
 							array( 'status' => 401 )
 						);
 					}
@@ -137,7 +149,7 @@ class Features {
 		if ( $this->on( 'disable_tagline_editing' ) ) {
 			add_filter(
 				'pre_update_option_blogdescription',
-				static function ( $new_value, $old_value ) {
+				static function ( mixed $new_value, mixed $old_value ): mixed {
 					return $old_value;
 				},
 				10,
@@ -148,7 +160,7 @@ class Features {
 		if ( $this->on( 'lock_permalink_structure' ) ) {
 			add_filter(
 				'pre_update_option_permalink_structure',
-				static function ( $new_value, $old_value ) {
+				static function ( mixed $new_value, mixed $old_value ): mixed {
 					return $old_value;
 				},
 				10,
@@ -188,7 +200,7 @@ class Features {
 					return;
 				}
 				echo '<div class="notice notice-warning"><p>';
-				echo esc_html__( 'Permalink structure is locked by WP Governance and cannot be changed.' );
+				echo esc_html__( 'Permalink structure is locked by WP Governance and cannot be changed.', 'wp-governance' );
 				echo '</p></div>';
 			}
 		);
@@ -480,6 +492,7 @@ class Features {
 	 */
 	public function empty_core_update_transient( $transient ): object {
 		$empty                  = is_object( $transient ) ? clone $transient : new \stdClass();
+		/** @var \stdClass $empty */
 		$empty->updates         = array();
 		$empty->last_checked    = time();
 		$empty->version_checked = get_bloginfo( 'version' );
@@ -495,6 +508,7 @@ class Features {
 	 */
 	public function empty_plugin_update_transient( $transient ): object {
 		$empty               = is_object( $transient ) ? clone $transient : new \stdClass();
+		/** @var \stdClass $empty */
 		$empty->last_checked = time();
 		$empty->checked      = array();
 		$empty->response     = array();
@@ -512,6 +526,7 @@ class Features {
 	 */
 	public function empty_theme_update_transient( $transient ): object {
 		$empty               = is_object( $transient ) ? clone $transient : new \stdClass();
+		/** @var \stdClass $empty */
 		$empty->last_checked = time();
 		$empty->checked      = array();
 		$empty->response     = array();

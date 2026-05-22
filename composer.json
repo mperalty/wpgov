@@ -15,7 +15,10 @@
         "phpcsstandards/phpcsutils": "^1.0",
         "phpstan/phpstan": "^2.0",
         "szepeviktor/phpstan-wordpress": "^2.0",
-        "php-stubs/wp-cli-stubs": "^2.0"
+        "php-stubs/wp-cli-stubs": "^2.0",
+        "phpmd/phpmd": "^2.15",
+        "vimeo/psalm": "^6.5",
+        "maglnet/composer-require-checker": "^4.20"
     },
     "autoload": {
         "classmap": [

@@ -12,6 +12,10 @@ defined( 'ABSPATH' ) || exit;
  */
 class Security {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<string, mixed>
+	 */
 	private array $settings;
 
 	/** @var bool Whether to add X-Robots-Tag noindex header. */
@@ -20,6 +24,14 @@ class Security {
 	/** @var bool Whether to remove the X-Pingback header. */
 	private bool $remove_pingback = false;
 
+	/**
+	 * @param array $settings Security settings.
+	 * @phpstan-param array<string, mixed> $settings Security settings.
+	 * @psalm-param array $settings Security settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $settings, array $config ) {
 		$this->settings        = $settings;
@@ -82,7 +94,11 @@ class Security {
 	 * Consolidated wp_headers filter: merge custom headers, add noindex, remove pingback.
 	 *
 	 * @param array $headers Current WordPress headers.
+	 * @phpstan-param array<string, string> $headers Current WordPress headers.
+	 * @psalm-param array $headers Current WordPress headers.
 	 * @return array
+	 * @phpstan-return array<string, string>
+	 * @psalm-return array
 	 */
 	public function filter_headers( array $headers ): array {
 		return $this->apply_header_policy( $headers );
@@ -98,7 +114,7 @@ class Security {
 		}
 
 		parse_str( $query, $args );
-		$version = (string) ( $args['ver'] ?? '' );
+		$version = isset( $args['ver'] ) && is_scalar( $args['ver'] ) ? (string) $args['ver'] : '';
 
 		if ( '' !== $version && $version === self::current_wp_version() ) {
 			$src = remove_query_arg( 'ver', $src );
@@ -144,7 +160,11 @@ class Security {
 	 * Apply the configured header policy to a header map.
 	 *
 	 * @param array $headers Existing headers.
+	 * @phpstan-param array<string, string> $headers Existing headers.
+	 * @psalm-param array $headers Existing headers.
 	 * @return array
+	 * @phpstan-return array<string, string>
+	 * @psalm-return array
 	 */
 	private function apply_header_policy( array $headers ): array {
 		foreach ( $this->build_header_map() as $name => $value ) {
@@ -161,7 +181,9 @@ class Security {
 	/**
 	 * Build the sanitized header map configured for this site.
 	 *
-	 * @return array<string, string>
+	 * @return array
+	 * @phpstan-return array<string, string>
+	 * @psalm-return array
 	 */
 	private function build_header_map(): array {
 		$headers = array();

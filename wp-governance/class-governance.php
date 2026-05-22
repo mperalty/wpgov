@@ -15,11 +15,16 @@ class Governance {
 	/** @var self|null Singleton instance. */
 	private static ?self $instance = null;
 
-	/** @var array Instantiated module objects. */
+	/**
+	 * @var array Instantiated module objects.
+	 * @phpstan-var array<string, object> Instantiated module objects.
+	 */
 	private array $modules = array();
 
 	/**
 	 * Module class map: config key => class file + class name.
+	 *
+	 * @var array<string, array{0:string, 1:string}>
 	 */
 	private const MODULE_MAP = array(
 		'features'                 => array( 'class-features.php', 'Features' ),
@@ -61,6 +66,8 @@ class Governance {
 		 * Fires before governance enforcement begins.
 		 *
 		 * @param array $config The full governance config.
+	 * @phpstan-param array<string, mixed> $config The full governance config.
+	 * @psalm-param array $config The full governance config.
 		 */
 		do_action( 'wp_governance_before_enforce', $config );
 
@@ -72,7 +79,7 @@ class Governance {
 		foreach ( self::MODULE_MAP as $key => [$file, $class] ) {
 			$section = $config[ $key ] ?? array();
 
-			if ( empty( $section ) ) {
+			if ( ! is_array( $section ) || array() === $section ) {
 				continue;
 			}
 
@@ -96,19 +103,25 @@ class Governance {
 		 *
 		 * @param array $config  The full governance config.
 		 * @param array $modules Instantiated module objects keyed by config section.
+	 * @phpstan-param array<string, object> $modules Instantiated module objects keyed by config section.
+	 * @psalm-param array $modules Instantiated module objects keyed by config section.
 		 */
 		do_action( 'wp_governance_loaded', $config, $this->modules );
 	}
 
 	/**
 	 * Load upload governance when either MIME restrictions or upload settings exist.
+	 *
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
 	 */
 	private function boot_uploads( array $config ): void {
 		$allowed        = $config['allowed_mime_types'] ?? array();
 		$uploads        = $config['uploads'] ?? array();
 		$has_size_limit = is_array( $uploads ) && array_key_exists( 'max_upload_size_mb', $uploads ) && null !== $uploads['max_upload_size_mb'];
 
-		if ( empty( $allowed ) && ! $has_size_limit ) {
+		if ( ( ! is_array( $allowed ) || array() === $allowed ) && ! $has_size_limit ) {
 			return;
 		}
 
@@ -118,34 +131,49 @@ class Governance {
 
 	/**
 	 * Execute user-registered custom rule callables.
+	 *
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
 	 */
 	private function run_custom_rules( array $config ): void {
 		$rules = $config['custom_rules'] ?? array();
 
-		if ( empty( $rules ) ) {
+		if ( ! is_array( $rules ) || array() === $rules ) {
 			return;
 		}
 
 		foreach ( $rules as $rule ) {
 			$parsed = $this->parse_custom_rule( $rule );
-			if ( empty( $parsed ) || ! empty( $parsed['disabled'] ) ) {
+			if ( array() === $parsed ) {
+				continue;
+			}
+
+			/** @var array{callback:mixed,hook:string,priority:int,admin_only:bool,front_only:bool,disabled:bool} $parsed */
+			$callback   = $parsed['callback'];
+			$hook       = $parsed['hook'];
+			$priority   = $parsed['priority'];
+			$admin_only = $parsed['admin_only'];
+			$front_only = $parsed['front_only'];
+
+			if ( $parsed['disabled'] || ! is_callable( $callback ) ) {
 				continue;
 			}
 
 			add_action(
-				$parsed['hook'],
-				static function () use ( $parsed, $config ) {
-					if ( $parsed['admin_only'] && ! is_admin() ) {
+				$hook,
+				static function () use ( $callback, $config, $admin_only, $front_only ): void {
+					if ( $admin_only && ! is_admin() ) {
 						return;
 					}
 
-					if ( $parsed['front_only'] && is_admin() ) {
+					if ( $front_only && is_admin() ) {
 						return;
 					}
 
-					call_user_func( $parsed['callback'], $config );
+					call_user_func( $callback, $config );
 				},
-				$parsed['priority']
+				$priority
 			);
 		}
 	}
@@ -155,6 +183,7 @@ class Governance {
 	 *
 	 * @param mixed $rule Rule definition.
 	 * @return array{callback:mixed,hook:string,priority:int,admin_only:bool,front_only:bool,disabled:bool}|array{}
+	 * @psalm-return array{callback:mixed,hook:string,priority:int,admin_only:bool,front_only:bool,disabled:bool}|array{}
 	 */
 	private function parse_custom_rule( $rule ): array {
 		$parsed = array(

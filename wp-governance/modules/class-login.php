@@ -11,8 +11,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class Login {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<string, mixed>
+	 */
 	private array $settings;
 
+	/**
+	 * @param array $settings Login settings.
+	 * @phpstan-param array<string, mixed> $settings Login settings.
+	 * @psalm-param array $settings Login settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $settings, array $config ) {
 		$this->settings = $settings;
@@ -42,7 +54,7 @@ class Login {
 			add_filter(
 				'login_errors',
 				static function (): string {
-					return __( 'Invalid credentials.' );
+					return __( 'Invalid credentials.', 'wp-governance' );
 				}
 			);
 		}
@@ -80,11 +92,11 @@ class Login {
 			return false;
 		}
 
-		if ( ! is_numeric( $user_id ) || (int) $user_id <= 0 ) {
+		if ( ! is_int( $user_id ) || $user_id <= 0 ) {
 			return false;
 		}
 
-		$user = get_user_by( 'id', (int) $user_id );
+		$user = get_user_by( 'id', $user_id );
 		if ( ! $user instanceof \WP_User ) {
 			return false;
 		}

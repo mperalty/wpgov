@@ -56,20 +56,26 @@ class CLI extends \WP_CLI_Command {
 	 * ---
 	 * default: table
 	 * options:
-	 *   - table
-	 *   - json
-	 *   - csv
-	 *   - yaml
+	 * - table
+	 * - json
+	 * - csv
+	 * - yaml
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance status
-	 *     wp governance status --format=json
+	 * wp governance status
+	 * wp governance status --format=json
 	 *
 	 * @subcommand status
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function status( $args, $assoc_args ) {
+	public function status( array $args, array $assoc_args ): void {
 		$config = Config::get();
 		$path   = Config::path();
 
@@ -80,7 +86,8 @@ class CLI extends \WP_CLI_Command {
 		// Config file info.
 		if ( is_readable( $path ) ) {
 			WP_CLI::log( WP_CLI::colorize( '%bConfig file:%n  ' . $path ) );
-			WP_CLI::log( WP_CLI::colorize( '%bLast modified:%n ' . gmdate( 'Y-m-d H:i:s', filemtime( $path ) ) . ' UTC' ) );
+			$mtime = filemtime( $path );
+			WP_CLI::log( WP_CLI::colorize( '%bLast modified:%n ' . gmdate( 'Y-m-d H:i:s', false !== $mtime ? $mtime : time() ) . ' UTC' ) );
 		} else {
 			WP_CLI::warning( 'Config file not found: ' . $path );
 		}
@@ -100,6 +107,7 @@ class CLI extends \WP_CLI_Command {
 
 		// Features.
 		$features = $config['features'] ?? array();
+		$features = is_array( $features ) ? $features : array();
 		$active   = count( array_filter( $features ) );
 		$rows[]   = array(
 			'module'       => 'Features',
@@ -155,6 +163,7 @@ class CLI extends \WP_CLI_Command {
 
 		// Login.
 		$login       = $config['login'] ?? array();
+		$login       = is_array( $login ) ? $login : array();
 		$login_count = count( array_filter( $login ) );
 		$rows[]      = array(
 			'module'       => 'Login',
@@ -164,6 +173,7 @@ class CLI extends \WP_CLI_Command {
 
 		// Content.
 		$content       = $config['content'] ?? array();
+		$content       = is_array( $content ) ? $content : array();
 		$content_count = count( array_filter( $content ) );
 		$rows[]        = array(
 			'module'       => 'Content',
@@ -173,6 +183,7 @@ class CLI extends \WP_CLI_Command {
 
 		// Head cleanup.
 		$head       = $config['head_cleanup'] ?? array();
+		$head       = is_array( $head ) ? $head : array();
 		$head_count = count( array_filter( $head ) );
 		$rows[]     = array(
 			'module'       => 'Head Cleanup',
@@ -190,6 +201,7 @@ class CLI extends \WP_CLI_Command {
 
 		// Admin footer.
 		$footer       = $config['admin_footer'] ?? array();
+		$footer       = is_array( $footer ) ? $footer : array();
 		$footer_count = count( array_filter( $footer ) );
 		$rows[]       = array(
 			'module'       => 'Admin Footer',
@@ -231,7 +243,7 @@ class CLI extends \WP_CLI_Command {
 			'status'       => count( $locked ) > 0 ? 'enforcing' : 'off',
 		);
 
-		$format    = $assoc_args['format'] ?? 'table';
+		$assoc_args['format'] = $assoc_args['format'] ?? 'table';
 		$formatter = new Formatter( $assoc_args, array( 'module', 'active_rules', 'status' ) );
 		$formatter->display_items( $rows );
 	}
@@ -244,18 +256,24 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance check
+	 * wp governance check
 	 *
 	 * @subcommand check
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function check( $args, $assoc_args ) {
+	public function check( array $args, array $assoc_args ): void {
 		$path = Config::path();
 
 		WP_CLI::log( 'Checking config: ' . $path );
 		WP_CLI::log( '' );
 
 		$inspection = Config::inspect_path( $path );
-		if ( ! empty( $inspection['errors'] ) ) {
+		if ( array() !== $inspection['errors'] ) {
 			WP_CLI::error( implode( "\n", $inspection['errors'] ) );
 		}
 
@@ -290,9 +308,9 @@ class CLI extends \WP_CLI_Command {
 	 * : Filter by status.
 	 * ---
 	 * options:
-	 *   - enforced
-	 *   - off
-	 *   - all
+	 * - enforced
+	 * - off
+	 * - all
 	 * default: all
 	 * ---
 	 *
@@ -301,21 +319,29 @@ class CLI extends \WP_CLI_Command {
 	 * ---
 	 * default: table
 	 * options:
-	 *   - table
-	 *   - json
-	 *   - csv
-	 *   - yaml
+	 * - table
+	 * - json
+	 * - csv
+	 * - yaml
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance features
-	 *     wp governance features --status=enforced
-	 *     wp governance features --format=json
+	 * wp governance features
+	 * wp governance features --status=enforced
+	 * wp governance features --format=json
 	 *
 	 * @subcommand features
+	 *
+	 * @return void
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function features( $args, $assoc_args ) {
+	public function features( array $args, array $assoc_args ): void {
 		$features = Config::section( 'features' );
 
 		if ( empty( $features ) ) {
@@ -361,20 +387,28 @@ class CLI extends \WP_CLI_Command {
 	 * ---
 	 * default: table
 	 * options:
-	 *   - table
-	 *   - json
-	 *   - csv
-	 *   - yaml
+	 * - table
+	 * - json
+	 * - csv
+	 * - yaml
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance caps
-	 *     wp governance caps --role=editor
+	 * wp governance caps
+	 * wp governance caps --role=editor
 	 *
 	 * @subcommand caps
+	 *
+	 * @return void
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function caps( $args, $assoc_args ) {
+	public function caps( array $args, array $assoc_args ): void {
 		$deny = Config::section( 'deny_capabilities' );
 
 		if ( empty( $deny ) ) {
@@ -386,7 +420,7 @@ class CLI extends \WP_CLI_Command {
 		$rows        = array();
 
 		foreach ( $deny as $role => $caps ) {
-			if ( $filter_role && $role !== $filter_role ) {
+			if ( '' !== $filter_role && $role !== $filter_role ) {
 				continue;
 			}
 			foreach ( $caps as $cap ) {
@@ -417,19 +451,27 @@ class CLI extends \WP_CLI_Command {
 	 * ---
 	 * default: table
 	 * options:
-	 *   - table
-	 *   - json
-	 *   - csv
-	 *   - yaml
+	 * - table
+	 * - json
+	 * - csv
+	 * - yaml
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance menus
+	 * wp governance menus
 	 *
 	 * @subcommand menus
+	 *
+	 * @return void
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function menus( $args, $assoc_args ) {
+	public function menus( array $args, array $assoc_args ): void {
 		$slugs = Config::section( 'restricted_menu_slugs' );
 
 		if ( empty( $slugs ) ) {
@@ -456,19 +498,27 @@ class CLI extends \WP_CLI_Command {
 	 * ---
 	 * default: table
 	 * options:
-	 *   - table
-	 *   - json
-	 *   - csv
-	 *   - yaml
+	 * - table
+	 * - json
+	 * - csv
+	 * - yaml
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance mimes
+	 * wp governance mimes
 	 *
 	 * @subcommand mimes
+	 *
+	 * @return void
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function mimes( $args, $assoc_args ) {
+	public function mimes( array $args, array $assoc_args ): void {
 		$mimes = Config::section( 'allowed_mime_types' );
 
 		if ( empty( $mimes ) ) {
@@ -501,23 +551,29 @@ class CLI extends \WP_CLI_Command {
 	 * ---
 	 * default: json
 	 * options:
-	 *   - json
-	 *   - yaml
+	 * - json
+	 * - yaml
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance get features
-	 *     wp governance get login
-	 *     wp governance get content --format=yaml
+	 * wp governance get features
+	 * wp governance get login
+	 * wp governance get content --format=yaml
 	 *
 	 * @subcommand get
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function get( $args, $assoc_args ) {
+	public function get( array $args, array $assoc_args ): void {
 		$section_key = $args[0];
 		$config      = Config::get();
 
-		if ( ! array_key_exists( $section_key, $config ) ) {
+		if ( ! is_string( $section_key ) || ! array_key_exists( $section_key, $config ) ) {
 			WP_CLI::error( "Unknown config section: {$section_key}" );
 		}
 
@@ -540,13 +596,19 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance export
-	 *     wp governance export --pretty
-	 *     wp governance export > governance-backup.json
+	 * wp governance export
+	 * wp governance export --pretty
+	 * wp governance export > governance-backup.json
 	 *
 	 * @subcommand export
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function export( $args, $assoc_args ) {
+	public function export( array $args, array $assoc_args ): void {
 		$config = Config::get();
 		$flags  = JSON_UNESCAPED_SLASHES;
 
@@ -554,7 +616,8 @@ class CLI extends \WP_CLI_Command {
 			$flags |= JSON_PRETTY_PRINT;
 		}
 
-		WP_CLI::log( wp_json_encode( $config, $flags ) );
+		$json = wp_json_encode( $config, $flags );
+		WP_CLI::log( false === $json ? '{}' : $json );
 	}
 
 	/**
@@ -564,11 +627,19 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance diff
+	 * wp governance diff
 	 *
 	 * @subcommand diff
+	 *
+	 * @return void
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function diff( $args, $assoc_args ) {
+	public function diff( array $args, array $assoc_args ): void {
 		$config   = Config::get();
 		$defaults = Config::sample_defaults();
 
@@ -616,10 +687,10 @@ class CLI extends \WP_CLI_Command {
 	 * ---
 	 * default: all
 	 * options:
-	 *   - all
-	 *   - high
-	 *   - medium
-	 *   - low
+	 * - all
+	 * - high
+	 * - medium
+	 * - low
 	 * ---
 	 *
 	 * [--format=<format>]
@@ -627,21 +698,29 @@ class CLI extends \WP_CLI_Command {
 	 * ---
 	 * default: table
 	 * options:
-	 *   - table
-	 *   - json
-	 *   - csv
-	 *   - yaml
+	 * - table
+	 * - json
+	 * - csv
+	 * - yaml
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp governance audit
-	 *     wp governance audit --severity=high
-	 *     wp governance audit --format=json
+	 * wp governance audit
+	 * wp governance audit --severity=high
+	 * wp governance audit --format=json
 	 *
 	 * @subcommand audit
+	 *
+	 * @return void
+	 * @param array $args Positional WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $args Positional WP-CLI arguments.
+	 * @psalm-param array $args Positional WP-CLI arguments.
+	 * @param array $assoc_args Associative WP-CLI arguments.
+	 * @phpstan-param array<int|string, mixed> $assoc_args Associative WP-CLI arguments.
+	 * @psalm-param array $assoc_args Associative WP-CLI arguments.
 	 */
-	public function audit( $args, $assoc_args ) {
+	public function audit( array $args, array $assoc_args ): void {
 		$config   = Config::get();
 		$findings = array();
 
@@ -700,6 +779,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check feature toggles that are not enabled.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_feature_toggles( array $config, array &$findings ): void {
 		$features = $config['features'] ?? array();
@@ -741,6 +826,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check login and authentication settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_login_settings( array $config, array &$findings ): void {
 		$login = $config['login'] ?? array();
@@ -775,6 +866,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check security hardening settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_security_settings( array $config, array &$findings ): void {
 		$security = $config['security'] ?? array();
@@ -818,6 +915,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check head cleanup settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_head_cleanup_settings( array $config, array &$findings ): void {
 		$head = $config['head_cleanup'] ?? array();
@@ -844,6 +947,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check content restriction settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_content_settings( array $config, array &$findings ): void {
 		$content = $config['content'] ?? array();
@@ -878,12 +987,18 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check upload restriction settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_upload_settings( array $config, array &$findings ): void {
 		$mimes   = $config['allowed_mime_types'] ?? array();
 		$uploads = $config['uploads'] ?? array();
 
-		if ( empty( $mimes ) ) {
+		if ( ! is_array( $mimes ) || array() === $mimes ) {
 			$default_count = function_exists( 'wp_get_mime_types' ) ? count( wp_get_mime_types() ) : '80+';
 			$findings[]    = array(
 				'severity' => 'medium',
@@ -905,6 +1020,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check for common admin bar nodes that are not removed.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_admin_bar_nodes( array $config, array &$findings ): void {
 		$removed = $config['remove_admin_bar_nodes'] ?? array();
@@ -930,6 +1051,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check for common dashboard widgets that are not removed.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_dashboard_widgets( array $config, array &$findings ): void {
 		$features = $config['features'] ?? array();
@@ -961,6 +1088,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check whether any wp_options values are pinned.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_locked_options( array $config, array &$findings ): void {
 		if ( empty( $config['locked_options'] ) ) {
@@ -975,6 +1108,12 @@ class CLI extends \WP_CLI_Command {
 
 	/**
 	 * Check admin footer customization.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 * @param array $findings Audit findings accumulator.
+	 * @phpstan-param array<int, array<string, mixed>> $findings Audit findings accumulator.
+	 * @psalm-param array $findings Audit findings accumulator.
 	 */
 	private function audit_admin_footer_settings( array $config, array &$findings ): void {
 		$footer = $config['admin_footer'] ?? array();

@@ -11,8 +11,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class Admin_Footer {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<string, mixed>
+	 */
 	private array $settings;
 
+	/**
+	 * @param array $settings Admin footer settings.
+	 * @phpstan-param array<string, mixed> $settings Admin footer settings.
+	 * @psalm-param array $settings Admin footer settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $settings, array $config ) {
 		$this->settings = $settings;
