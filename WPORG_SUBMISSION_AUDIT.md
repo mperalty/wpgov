@@ -1,7 +1,7 @@
-# WordPress.org Submission Audit - WP Governance
+# WordPress.org Submission Audit - Governance Guardrails
 
 Audit date: 2026-05-22
-Plugin: WP Governance
+Plugin: Governance Guardrails
 Intended WordPress.org slug: `wp-governance`
 Repository: https://github.com/mperalty/wpgov
 
@@ -102,7 +102,7 @@ A follow-up search found no remaining simple runtime translation calls in `wp-go
 
 1. Must-use plugin posture
 
-WP Governance was originally documented as a must-use plugin. The new readme and plugin header now explain that it can run as a normal plugin too, but reviewers may still ask for clarification because governance rules are code/config-file driven rather than settings-screen driven.
+Governance Guardrails was originally documented as a must-use plugin. The new readme and plugin header now explain that it can run as a normal plugin too, but reviewers may still ask for clarification because governance rules are code/config-file driven rather than settings-screen driven.
 
 2. Runtime capability restriction model
 

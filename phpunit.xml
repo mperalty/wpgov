@@ -9,7 +9,7 @@
     </exclude>
   </coverage>
   <testsuites>
-    <testsuite name="WP Governance">
+    <testsuite name="Governance Guardrails">
       <directory suffix="Test.php">./tests</directory>
     </testsuite>
   </testsuites>
