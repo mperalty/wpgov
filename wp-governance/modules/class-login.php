@@ -54,7 +54,7 @@ class Login {
 			add_filter(
 				'login_errors',
 				static function (): string {
-					return __( 'Invalid credentials.', 'wp-governance' );
+					return __( 'Invalid credentials.', 'governance-guardrails' );
 				}
 			);
 		}

@@ -66,8 +66,8 @@ class Post_Types {
 						$type = self::current_post_type( $typenow );
 						if ( in_array( $type, $hidden, true ) ) {
 							wp_die(
-								esc_html__( 'You do not have permission to access this post type.', 'wp-governance' ),
-								esc_html__( 'Restricted', 'wp-governance' ),
+								esc_html__( 'You do not have permission to access this post type.', 'governance-guardrails' ),
+								esc_html__( 'Restricted', 'governance-guardrails' ),
 								array(
 									'response'  => 403,
 									'back_link' => true,

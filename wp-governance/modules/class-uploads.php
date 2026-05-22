@@ -185,7 +185,7 @@ class Uploads {
 
 		$file['error'] = sprintf(
 			/* translators: %s: upload size limit in MB */
-			__( 'This file exceeds the governance upload limit of %s MB.', 'wp-governance' ),
+			__( 'This file exceeds the governance upload limit of %s MB.', 'governance-guardrails' ),
 			rtrim( rtrim( number_format_i18n( $limit / MB_IN_BYTES, 2 ), '0' ), '.' )
 		);
 

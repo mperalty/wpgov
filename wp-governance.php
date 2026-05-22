@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: WP Governance
+ * Plugin Name: Governance Guardrails
  * Plugin URI: https://github.com/mperalty/wpgov
  * Description: File-based WordPress governance — restrict features, capabilities, and admin UI via config.
  * Version: 1.0.0
@@ -8,7 +8,7 @@
  * Author URI: https://peralty.com/
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-governance
+ * Text Domain: governance-guardrails
  * Domain Path: /languages
  *
  * This plugin can be activated as a normal plugin or installed as a must-use

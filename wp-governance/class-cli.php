@@ -8,7 +8,7 @@ use WP_CLI\Formatter;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Manage WP Governance rules from the command line.
+ * Manage Governance Guardrails rules from the command line.
  *
  * ## EXAMPLES
  *
@@ -80,7 +80,7 @@ class CLI extends \WP_CLI_Command {
 		$path   = Config::path();
 
 		WP_CLI::log( '' );
-		WP_CLI::log( WP_CLI::colorize( '%GWP Governance v' . WP_GOVERNANCE_VERSION . '%n' ) );
+		WP_CLI::log( WP_CLI::colorize( '%GGovernance Guardrails v' . WP_GOVERNANCE_VERSION . '%n' ) );
 		WP_CLI::log( '' );
 
 		// Config file info.
