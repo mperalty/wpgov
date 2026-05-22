@@ -94,7 +94,7 @@ class StatusPageTest extends WP_UnitTestCase {
         $page->render();
         $html = ob_get_clean();
 
-        $this->assertStringContainsString( 'WP Governance - Active Rules', $html );
+        $this->assertStringContainsString( 'Governance Guardrails - Active Rules', $html );
         $this->assertStringContainsString( 'Feature Toggles', $html );
         $this->assertStringContainsString( 'Custom Rules', $html );
         $this->assertStringContainsString( 'Hook: wp_loaded', $html );

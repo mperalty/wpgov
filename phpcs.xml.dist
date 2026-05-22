@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="WP Governance Focused Checks">
-	<description>Focused WPCS rules for production-risk checks in WP Governance runtime code.</description>
+<ruleset name="Governance Guardrails Focused Checks">
+	<description>Focused WPCS rules for production-risk checks in Governance Guardrails runtime code.</description>
 
 	<file>wp-governance.php</file>
 	<file>wp-governance</file>

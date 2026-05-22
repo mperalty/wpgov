@@ -1,6 +1,6 @@
-# WP Governance
+# Governance Guardrails
 
-WP Governance is a file-based WordPress mu-plugin for locking down admin features, capabilities, UI, uploads, and other operational rules without writing settings into the database.
+Governance Guardrails is a file-based WordPress plugin for locking down admin features, capabilities, UI, uploads, and other operational rules without writing settings into the database.
 
 ## What You Can Control
 
@@ -25,13 +25,13 @@ Because the entire policy is a single PHP file, you can:
 - **Deploy to many sites at once** — push the same config across dozens or hundreds of client sites via your deployment pipeline, CI/CD, or configuration management
 - **Enforce consistency** — guarantee that every site in a fleet shares the same security posture, upload rules, and UI restrictions regardless of what any individual admin toggles in the dashboard
 - **Avoid database drift** — settings live in code, not in `wp_options` rows that can be changed through the admin, lost during migrations, or diverge between environments
-- **Onboard new sites instantly** — drop the mu-plugin and config file in, and the full policy is active on the next page load with nothing to configure through the UI
+- **Onboard new sites instantly** — drop the plugin and config file in, and the full policy is active on the next page load with nothing to configure through the UI
 
 ## Coming from Drupal?
 
-If you've managed Drupal sites, most of WP Governance will feel familiar — it's the same idea as config sync, just shaped for WordPress.
+If you've managed Drupal sites, most of Governance Guardrails will feel familiar — it's the same idea as config sync, just shaped for WordPress.
 
-| Drupal concept | WP Governance equivalent |
+| Drupal concept | Governance Guardrails equivalent |
 |---|---|
 | `core.extension.yml` / config sync directory | `wp-governance-config.php` — one file that declares the full policy |
 | `$config` overrides in `settings.php` | The entire approach — config lives in a PHP file, not the database |
@@ -43,7 +43,7 @@ If you've managed Drupal sites, most of WP Governance will feel familiar — it'
 | Security Review / `drush security:check` | `wp governance audit` — opinionated checklist of ungoverned items |
 | `system.date` / `system.site` config objects | `locked_options` — pin any `wp_options` value (date format, timezone, site name, etc.) from the config file |
 
-The mental model is the same: define your site's policy in code, commit it, and deploy it across environments. The difference is that WordPress doesn't have a native config management layer, so WP Governance fills that gap for the operational and security settings that matter most. There's no export/import cycle — the PHP file _is_ the active config, read on every request.
+The mental model is the same: define your site's policy in code, commit it, and deploy it across environments. The difference is that WordPress doesn't have a native config management layer, so Governance Guardrails fills that gap for the operational and security settings that matter most. There's no export/import cycle — the PHP file _is_ the active config, read on every request.
 
 ## Requirements
 
@@ -52,11 +52,17 @@ The mental model is the same: define your site's policy in code, commit it, and 
 
 ## Structure
 
-- `wp-governance.php` is the mu-plugin loader.
+- `wp-governance.php` is the plugin loader (works as a normal plugin or mu-plugin).
 - `wp-governance/` contains the governance modules and sample config.
 - `tests/` contains the PHPUnit suite and bootstrap.
 
 ## Installation
+
+### Normal plugin
+
+Upload the plugin files to `/wp-content/plugins/governance-guardrails/` or install through the WordPress Plugins screen.
+
+### Must-use plugin
 
 Copy `wp-governance.php` and the `wp-governance/` directory into `wp-content/mu-plugins/`.
 
@@ -98,7 +104,7 @@ This means an administrator can still upload any file type and see all dashboard
 
 ## Environment-Specific Overrides
 
-WP Governance automatically deep-merges an environment-specific override file on top of the base config. The environment is read from the `WP_ENVIRONMENT_TYPE` constant (set it in `wp-config.php`).
+Governance Guardrails automatically deep-merges an environment-specific override file on top of the base config. The environment is read from the `WP_ENVIRONMENT_TYPE` constant (set it in `wp-config.php`).
 
 Create a file alongside your base config named `wp-governance-config.{environment}.php`:
 
@@ -138,15 +144,6 @@ Limit uploads to approved image/document types and a 10 MB cap:
 ),
 'uploads' => array(
     'max_upload_size_mb' => 10,
-),
-```
-
-Turn off update checks and UI in a locked-down environment:
-
-```php
-'features' => array(
-    'disable_updates'        => true,
-    'disable_auto_update_ui' => true,
 ),
 ```
 

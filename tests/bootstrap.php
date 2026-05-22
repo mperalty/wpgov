@@ -1,6 +1,6 @@
 <?php
 /**
- * PHPUnit bootstrap for WP Governance tests.
+ * PHPUnit bootstrap for Governance Guardrails tests.
  *
  * Prefers the vendored wp-phpunit library and the local `tests/wp-tests-config.php`
  * file so the test suite can run directly in this workspace without manual env setup.
