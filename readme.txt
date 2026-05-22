@@ -1,5 +1,5 @@
 === Governance Guardrails ===
-Contributors: mperalty
+Contributors: phoenixfireball
 Tags: governance, security, admin, mu-plugin, wp-cli
 Requires at least: 6.4
 Tested up to: 7.0
