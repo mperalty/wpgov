@@ -57,7 +57,7 @@ class Features {
 					if ( ! is_user_logged_in() ) {
 						return new \WP_Error(
 							'rest_not_logged_in',
-							__( 'REST API access is restricted to authenticated users.', 'wp-governance' ),
+							__( 'REST API access is restricted to authenticated users.', 'governance-guardrails' ),
 							array( 'status' => 401 )
 						);
 					}
@@ -136,10 +136,6 @@ class Features {
 			$this->disable_file_mods();
 		}
 
-		if ( $this->on( 'disable_updates' ) ) {
-			$this->disable_updates();
-		}
-
 		if ( $this->on( 'force_ssl_admin' ) ) {
 			if ( ! defined( 'FORCE_SSL_ADMIN' ) ) {
 				define( 'FORCE_SSL_ADMIN', true );
@@ -200,7 +196,7 @@ class Features {
 					return;
 				}
 				echo '<div class="notice notice-warning"><p>';
-				echo esc_html__( 'Permalink structure is locked by WP Governance and cannot be changed.', 'wp-governance' );
+				echo esc_html__( 'Permalink structure is locked by Governance Guardrails and cannot be changed.', 'governance-guardrails' );
 				echo '</p></div>';
 			}
 		);
@@ -386,74 +382,6 @@ class Features {
 	}
 
 	/**
-	 * Disable all WordPress update checks and notifications.
-	 */
-	private function disable_updates(): void {
-		// Disable update checks.
-		remove_action( 'wp_version_check', 'wp_version_check' );
-		remove_action( 'wp_update_plugins', 'wp_update_plugins' );
-		remove_action( 'wp_update_themes', 'wp_update_themes' );
-		remove_action( 'wp_maybe_auto_update', 'wp_maybe_auto_update' );
-		remove_action( 'admin_init', '_maybe_update_core' );
-		remove_action( 'admin_init', '_maybe_update_plugins' );
-		remove_action( 'admin_init', '_maybe_update_themes' );
-		remove_action( 'load-plugins.php', 'wp_update_plugins' );
-		remove_action( 'load-themes.php', 'wp_update_themes' );
-		remove_action( 'load-update-core.php', 'wp_update_plugins' );
-		remove_action( 'load-update-core.php', 'wp_update_themes' );
-		remove_action( 'load-update-core.php', 'wp_version_check' );
-		remove_action( 'load-update.php', 'wp_update_plugins' );
-		remove_action( 'load-update.php', 'wp_update_themes' );
-		remove_action( 'load-update.php', 'wp_version_check' );
-
-		// Prevent stale update payloads from being read or persisted.
-		add_filter( 'pre_site_transient_update_core', array( $this, 'empty_core_update_transient' ) );
-		add_filter( 'pre_site_transient_update_plugins', array( $this, 'empty_plugin_update_transient' ) );
-		add_filter( 'pre_site_transient_update_themes', array( $this, 'empty_theme_update_transient' ) );
-		add_filter( 'pre_set_site_transient_update_core', array( $this, 'empty_core_update_transient' ) );
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'empty_plugin_update_transient' ) );
-		add_filter( 'pre_set_site_transient_update_themes', array( $this, 'empty_theme_update_transient' ) );
-
-		add_filter( 'automatic_updater_disabled', '__return_true' );
-		add_filter( 'auto_update_core', '__return_false', 999 );
-		add_filter( 'auto_update_plugin', '__return_false', 999 );
-		add_filter( 'auto_update_theme', '__return_false', 999 );
-		add_filter( 'allow_dev_auto_core_updates', '__return_false' );
-		add_filter( 'allow_minor_auto_core_updates', '__return_false' );
-		add_filter( 'allow_major_auto_core_updates', '__return_false' );
-		add_filter( 'send_core_update_notification_email', '__return_false' );
-
-		// Hide update nags.
-		add_action(
-			'admin_init',
-			static function (): void {
-				remove_action( 'admin_notices', 'update_nag', 3 );
-				remove_action( 'network_admin_notices', 'update_nag', 3 );
-			}
-		);
-
-		// Remove the Updates submenu.
-		add_action(
-			'admin_menu',
-			static function (): void {
-				remove_submenu_page( 'index.php', 'update-core.php' );
-			}
-		);
-
-		// Remove updates node from admin bar.
-		add_action(
-			'wp_before_admin_bar_render',
-			static function (): void {
-				global $wp_admin_bar;
-
-				if ( $wp_admin_bar instanceof \WP_Admin_Bar ) {
-					$wp_admin_bar->remove_node( 'updates' );
-				}
-			}
-		);
-	}
-
-	/**
 	 * Keep the admin email check enabled for unrestricted users.
 	 *
 	 * @param mixed $interval Current interval value.
@@ -484,57 +412,6 @@ class Features {
 		return Config::current_user_is_unrestricted() ? $available : false;
 	}
 
-	/**
-	 * Return an empty core-update transient so WordPress does not trigger checks.
-	 *
-	 * @param mixed $transient Existing transient value.
-	 * @return object
-	 */
-	public function empty_core_update_transient( $transient ): object {
-		$empty                  = is_object( $transient ) ? clone $transient : new \stdClass();
-		/** @var \stdClass $empty */
-		$empty->updates         = array();
-		$empty->last_checked    = time();
-		$empty->version_checked = get_bloginfo( 'version' );
-
-		return $empty;
-	}
-
-	/**
-	 * Return an empty plugin-update transient so WordPress does not trigger checks.
-	 *
-	 * @param mixed $transient Existing transient value.
-	 * @return object
-	 */
-	public function empty_plugin_update_transient( $transient ): object {
-		$empty               = is_object( $transient ) ? clone $transient : new \stdClass();
-		/** @var \stdClass $empty */
-		$empty->last_checked = time();
-		$empty->checked      = array();
-		$empty->response     = array();
-		$empty->no_update    = array();
-		$empty->translations = array();
-
-		return $empty;
-	}
-
-	/**
-	 * Return an empty theme-update transient so WordPress does not trigger checks.
-	 *
-	 * @param mixed $transient Existing transient value.
-	 * @return object
-	 */
-	public function empty_theme_update_transient( $transient ): object {
-		$empty               = is_object( $transient ) ? clone $transient : new \stdClass();
-		/** @var \stdClass $empty */
-		$empty->last_checked = time();
-		$empty->checked      = array();
-		$empty->response     = array();
-		$empty->no_update    = array();
-		$empty->translations = array();
-
-		return $empty;
-	}
 
 	/**
 	 * Comprehensively disable comments site-wide.

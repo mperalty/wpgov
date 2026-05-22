@@ -36,10 +36,10 @@ class Status_Page {
 		// would make the page inaccessible when unrestricted_role is set
 		// to a role that lacks that capability (e.g. 'editor').
 		add_management_page(
-			__( 'WP Governance', 'wp-governance' ),
-			__( 'WP Governance', 'wp-governance' ),
+			__( 'Governance Guardrails', 'governance-guardrails' ),
+			__( 'Governance Guardrails', 'governance-guardrails' ),
 			'read',
-			'wp-governance',
+			'governance-guardrails',
 			array( $this, 'render' )
 		);
 	}
@@ -47,8 +47,8 @@ class Status_Page {
 	public function render(): void {
 		if ( ! Config::current_user_is_unrestricted() ) {
 			wp_die(
-				esc_html__( 'You do not have permission to access this page.', 'wp-governance' ),
-				esc_html__( 'Restricted', 'wp-governance' ),
+				esc_html__( 'You do not have permission to access this page.', 'governance-guardrails' ),
+				esc_html__( 'Restricted', 'governance-guardrails' ),
 				array( 'response' => 403 )
 			);
 		}
@@ -58,58 +58,58 @@ class Status_Page {
 		$modified = false !== $mtime ? gmdate( 'Y-m-d H:i:s', $mtime ) . ' UTC' : 'N/A';
 
 		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'WP Governance - Active Rules', 'wp-governance' ) . '</h1>';
+		echo '<h1>' . esc_html__( 'Governance Guardrails - Active Rules', 'governance-guardrails' ) . '</h1>';
 
 		// Meta info.
 		echo '<table class="widefat fixed striped" style="max-width:600px;margin-bottom:20px;">';
 		echo '<tbody>';
-		$this->meta_row( __( 'Plugin Version', 'wp-governance' ), WP_GOVERNANCE_VERSION );
-		$this->meta_row( __( 'Config File', 'wp-governance' ), $path );
-		$this->meta_row( __( 'Last Modified', 'wp-governance' ), $modified );
-		$this->meta_row( __( 'Unrestricted Role', 'wp-governance' ), $this->config['unrestricted_role'] ?? 'administrator' );
+		$this->meta_row( __( 'Plugin Version', 'governance-guardrails' ), WP_GOVERNANCE_VERSION );
+		$this->meta_row( __( 'Config File', 'governance-guardrails' ), $path );
+		$this->meta_row( __( 'Last Modified', 'governance-guardrails' ), $modified );
+		$this->meta_row( __( 'Unrestricted Role', 'governance-guardrails' ), $this->config['unrestricted_role'] ?? 'administrator' );
 		echo '</tbody></table>';
 
 		// Feature toggles.
 		$this->render_features();
 
 		// Menu restrictions.
-		$this->render_list( __( 'Restricted Menu Slugs', 'wp-governance' ), $this->config['restricted_menu_slugs'] ?? array() );
+		$this->render_list( __( 'Restricted Menu Slugs', 'governance-guardrails' ), $this->config['restricted_menu_slugs'] ?? array() );
 
 		// Admin bar.
-		$this->render_list( __( 'Removed Admin Bar Nodes', 'wp-governance' ), $this->config['remove_admin_bar_nodes'] ?? array() );
+		$this->render_list( __( 'Removed Admin Bar Nodes', 'governance-guardrails' ), $this->config['remove_admin_bar_nodes'] ?? array() );
 
 		// Dashboard widgets.
-		$this->render_list( __( 'Removed Dashboard Widgets', 'wp-governance' ), $this->config['remove_dashboard_widgets'] ?? array() );
+		$this->render_list( __( 'Removed Dashboard Widgets', 'governance-guardrails' ), $this->config['remove_dashboard_widgets'] ?? array() );
 
 		// Capabilities.
 		$this->render_capabilities();
 
 		// Upload MIME types.
 		$this->render_mime_types();
-		$this->render_key_value( __( 'Upload Restrictions', 'wp-governance' ), $this->config['uploads'] ?? array() );
+		$this->render_key_value( __( 'Upload Restrictions', 'governance-guardrails' ), $this->config['uploads'] ?? array() );
 
 		// Login settings.
-		$this->render_key_value( __( 'Login Restrictions', 'wp-governance' ), $this->config['login'] ?? array() );
+		$this->render_key_value( __( 'Login Restrictions', 'governance-guardrails' ), $this->config['login'] ?? array() );
 
 		// Content settings.
-		$this->render_key_value( __( 'Content Restrictions', 'wp-governance' ), $this->config['content'] ?? array() );
+		$this->render_key_value( __( 'Content Restrictions', 'governance-guardrails' ), $this->config['content'] ?? array() );
 
 		// Head cleanup.
-		$this->render_key_value( __( 'Head Cleanup', 'wp-governance' ), $this->config['head_cleanup'] ?? array() );
+		$this->render_key_value( __( 'Head Cleanup', 'governance-guardrails' ), $this->config['head_cleanup'] ?? array() );
 
 		// Suppressed notices.
-		$this->render_list( __( 'Suppressed Admin Notices', 'wp-governance' ), $this->config['suppress_admin_notices'] ?? array() );
+		$this->render_list( __( 'Suppressed Admin Notices', 'governance-guardrails' ), $this->config['suppress_admin_notices'] ?? array() );
 
 		// Admin footer.
-		$this->render_key_value( __( 'Admin Footer', 'wp-governance' ), $this->config['admin_footer'] ?? array() );
+		$this->render_key_value( __( 'Admin Footer', 'governance-guardrails' ), $this->config['admin_footer'] ?? array() );
 
 		// Post types.
 		$post_types = $this->config['post_types'] ?? array();
 		if ( ! empty( $post_types['hidden'] ) ) {
-			$this->render_list( __( 'Hidden Post Types', 'wp-governance' ), $post_types['hidden'] );
+			$this->render_list( __( 'Hidden Post Types', 'governance-guardrails' ), $post_types['hidden'] );
 		}
 		if ( ! empty( $post_types['disable_supports'] ) ) {
-			echo '<h2>' . esc_html__( 'Disabled Post Type Supports', 'wp-governance' ) . '</h2>';
+			echo '<h2>' . esc_html__( 'Disabled Post Type Supports', 'governance-guardrails' ) . '</h2>';
 			foreach ( $post_types['disable_supports'] as $pt => $supports ) {
 				echo '<h3 style="margin-bottom:5px;"><code>' . esc_html( $pt ) . '</code></h3>';
 				echo '<ul style="margin-left:20px;margin-top:0;">';
@@ -122,7 +122,7 @@ class Status_Page {
 
 		// Security.
 		$this->render_key_value(
-			__( 'Security Hardening', 'wp-governance' ),
+			__( 'Security Hardening', 'governance-guardrails' ),
 			array_filter(
 				$this->config['security'] ?? array(),
 				static fn( mixed $value ): bool => ! is_array( $value )
@@ -130,13 +130,13 @@ class Status_Page {
 		);
 		$sec_headers = $this->config['security']['headers'] ?? array();
 		if ( is_array( $sec_headers ) && array() !== $sec_headers ) {
-			$this->render_key_value( __( 'Security Headers', 'wp-governance' ), $sec_headers );
+			$this->render_key_value( __( 'Security Headers', 'governance-guardrails' ), $sec_headers );
 		}
 
 		// Custom rules.
 		$rule_rows = $this->custom_rule_rows();
 		if ( ! empty( $rule_rows ) ) {
-			$this->render_key_value( __( 'Custom Rules', 'wp-governance' ), $rule_rows );
+			$this->render_key_value( __( 'Custom Rules', 'governance-guardrails' ), $rule_rows );
 		}
 
 		echo '</div>';
@@ -155,14 +155,14 @@ class Status_Page {
 			return;
 		}
 
-		echo '<h2>' . esc_html__( 'Feature Toggles', 'wp-governance' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Feature Toggles', 'governance-guardrails' ) . '</h2>';
 		echo '<table class="widefat fixed striped" style="max-width:600px;margin-bottom:20px;">';
-		echo '<thead><tr><th>' . esc_html__( 'Feature', 'wp-governance' ) . '</th><th>' . esc_html__( 'Status', 'wp-governance' ) . '</th></tr></thead><tbody>';
+		echo '<thead><tr><th>' . esc_html__( 'Feature', 'governance-guardrails' ) . '</th><th>' . esc_html__( 'Status', 'governance-guardrails' ) . '</th></tr></thead><tbody>';
 
 		foreach ( $features as $key => $enabled ) {
 			$status = $enabled
-				? '<span style="color:#d63638;font-weight:600;">' . esc_html__( 'Enforced', 'wp-governance' ) . '</span>'
-				: '<span style="color:#00a32a;">' . esc_html__( 'Off', 'wp-governance' ) . '</span>';
+				? '<span style="color:#d63638;font-weight:600;">' . esc_html__( 'Enforced', 'governance-guardrails' ) . '</span>'
+				: '<span style="color:#00a32a;">' . esc_html__( 'Off', 'governance-guardrails' ) . '</span>';
 			echo '<tr>';
 			echo '<td><code>' . esc_html( $key ) . '</code></td>';
 			echo '<td>' . wp_kses_post( $status ) . '</td>';
@@ -196,7 +196,7 @@ class Status_Page {
 			return;
 		}
 
-		echo '<h2>' . esc_html__( 'Denied Capabilities', 'wp-governance' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Denied Capabilities', 'governance-guardrails' ) . '</h2>';
 		foreach ( $deny as $role => $caps ) {
 			echo '<h3 style="margin-bottom:5px;"><code>' . esc_html( $role ) . '</code></h3>';
 			echo '<ul style="margin-left:20px;margin-top:0;">';
@@ -213,9 +213,9 @@ class Status_Page {
 			return;
 		}
 
-		echo '<h2>' . esc_html__( 'Allowed Upload MIME Types', 'wp-governance' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Allowed Upload MIME Types', 'governance-guardrails' ) . '</h2>';
 		echo '<table class="widefat fixed striped" style="max-width:600px;margin-bottom:20px;">';
-		echo '<thead><tr><th>' . esc_html__( 'Extension', 'wp-governance' ) . '</th><th>' . esc_html__( 'MIME Type', 'wp-governance' ) . '</th></tr></thead><tbody>';
+		echo '<thead><tr><th>' . esc_html__( 'Extension', 'governance-guardrails' ) . '</th><th>' . esc_html__( 'MIME Type', 'governance-guardrails' ) . '</th></tr></thead><tbody>';
 
 		foreach ( $mimes as $ext => $mime ) {
 			echo '<tr>';
@@ -239,7 +239,7 @@ class Status_Page {
 
 		echo '<h2>' . esc_html( $title ) . '</h2>';
 		echo '<table class="widefat fixed striped" style="max-width:600px;margin-bottom:20px;">';
-		echo '<thead><tr><th>' . esc_html__( 'Setting', 'wp-governance' ) . '</th><th>' . esc_html__( 'Value', 'wp-governance' ) . '</th></tr></thead><tbody>';
+		echo '<thead><tr><th>' . esc_html__( 'Setting', 'governance-guardrails' ) . '</th><th>' . esc_html__( 'Value', 'governance-guardrails' ) . '</th></tr></thead><tbody>';
 
 		foreach ( $settings as $key => $value ) {
 			$display = is_bool( $value ) ? ( $value ? 'true' : 'false' ) : (string) $value;
@@ -270,7 +270,7 @@ class Status_Page {
 		foreach ( $rules as $name => $rule ) {
 			$hook     = 'init';
 			$priority = 10;
-			$scope    = __( 'All requests', 'wp-governance' );
+			$scope    = __( 'All requests', 'governance-guardrails' );
 
 			if ( is_array( $rule ) ) {
 				if ( ! empty( $rule['hook'] ) && is_scalar( $rule['hook'] ) ) {
@@ -282,19 +282,21 @@ class Status_Page {
 				}
 
 				if ( ! empty( $rule['disabled'] ) ) {
-					$scope = __( 'Disabled (conflicting scope)', 'wp-governance' );
+					$scope = __( 'Disabled (conflicting scope)', 'governance-guardrails' );
 				} elseif ( ! empty( $rule['admin_only'] ) ) {
-					$scope = __( 'Admin only', 'wp-governance' );
+					$scope = __( 'Admin only', 'governance-guardrails' );
 				} elseif ( ! empty( $rule['front_only'] ) ) {
-					$scope = __( 'Front-end only', 'wp-governance' );
+					$scope = __( 'Front-end only', 'governance-guardrails' );
 				}
 			}
 
 			$rows[ (string) $name ] = implode(
 				' | ',
 				array(
-					sprintf( __( 'Hook: %s', 'wp-governance' ), $hook ),
-					sprintf( __( 'Priority: %d', 'wp-governance' ), $priority ),
+					// translators: %s is the WordPress hook name used by a custom governance rule.
+					sprintf( __( 'Hook: %s', 'governance-guardrails' ), $hook ),
+					// translators: %d is the priority number used when registering a custom governance rule callback.
+					sprintf( __( 'Priority: %d', 'governance-guardrails' ), $priority ),
 					$scope,
 				)
 			);

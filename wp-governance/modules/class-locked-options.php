@@ -84,7 +84,7 @@ class Locked_Options {
 
 		echo '<div class="notice notice-warning"><p>';
 		printf(
-			'%s locked by WP Governance: <strong>%s</strong>',
+			'%s locked by Governance Guardrails: <strong>%s</strong>',
 			esc_html( $label ),
 			esc_html( $names )
 		);
@@ -111,7 +111,7 @@ class Locked_Options {
 		echo '<script>(function(){var l=' . ( false !== $json ? $json : '{}' ) . ';';
 		echo 'l.forEach(function(n){';
 		echo 'document.querySelectorAll(\'[name="\'+n+\'"],[name="\'+n+\'[]"]\').forEach(function(e){';
-		echo 'e.disabled=true;e.style.opacity="0.5";e.title="Locked by WP Governance";';
+		echo 'e.disabled=true;e.style.opacity="0.5";e.title="Locked by Governance Guardrails";';
 		echo '});';
 		// Permalink structure uses radio buttons with name="selection".
 		echo 'if(n==="permalink_structure"){';

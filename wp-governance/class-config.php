@@ -190,7 +190,7 @@ class Config {
 
 		$defaults = self::include_php_file( $path, $error );
 		if ( null !== $error ) {
-			self::warn( "WP Governance: sample config at {$path} could not be loaded. {$error}" );
+			self::warn( "Governance Guardrails: sample config at {$path} could not be loaded. {$error}" );
 			self::$sample_defaults = self::DEFAULTS;
 			return self::$sample_defaults;
 		}
@@ -290,7 +290,7 @@ class Config {
 		$config     = $inspection['effective'];
 
 		foreach ( $inspection['errors'] as $error ) {
-			self::warn( 'WP Governance: ' . $error );
+			self::warn( 'Governance Guardrails: ' . $error );
 		}
 
 		if ( ! is_array( $config ) ) {
@@ -300,7 +300,7 @@ class Config {
 		self::$environment_path = $inspection['loaded_environment_path'];
 
 		foreach ( self::validation_errors( $config ) as $error ) {
-			self::warn( 'WP Governance: ' . $error );
+			self::warn( 'Governance Guardrails: ' . $error );
 		}
 
 		return self::normalize( $config );
@@ -1576,7 +1576,6 @@ class Config {
 			'disable_search'                => false,
 			'disable_feeds'                 => false,
 			'disable_file_mods'             => false,
-			'disable_updates'               => false,
 			'force_ssl_admin'               => false,
 			'disable_tagline_editing'       => false,
 			'lock_permalink_structure'      => false,

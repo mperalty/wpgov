@@ -77,8 +77,8 @@ class Admin_Menu {
 		foreach ( $this->slugs as $slug ) {
 			if ( $this->request_matches_slug( $slug ) ) {
 				wp_die(
-					esc_html__( 'You do not have permission to access this page.', 'wp-governance' ),
-					esc_html__( 'Restricted', 'wp-governance' ),
+					esc_html__( 'You do not have permission to access this page.', 'governance-guardrails' ),
+					esc_html__( 'Restricted', 'governance-guardrails' ),
 					array(
 						'response'  => 403,
 						'back_link' => true,

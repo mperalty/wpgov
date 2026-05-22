@@ -1,8 +1,8 @@
 <?php
 /**
- * WP Governance Configuration
+ * Governance Guardrails Configuration
  *
- * This file controls all governance rules enforced by the WP Governance mu-plugin.
+ * This file controls all governance rules enforced by the Governance Guardrails mu-plugin.
  * Toggle features by setting values to true/false. Changes take effect immediately
  * on the next page load — no database writes, no cache to clear.
  *
@@ -76,12 +76,9 @@ return array(
 		// Disable all RSS/Atom feeds (redirects feed URLs to homepage).
 		'disable_feeds'                 => false,
 
-		// Prevent ALL file modifications: plugin/theme install, update, and edit.
-		// More aggressive than disable_file_editor. Sets DISALLOW_FILE_MODS constant.
+		// Prevent file modifications by setting DISALLOW_FILE_MODS.
+		// This does not alter WordPress.org update routines.
 		'disable_file_mods'             => false,
-
-		// Disable all WordPress update checks and hide the Updates admin page.
-		'disable_updates'               => false,
 
 		// Force SSL on the admin area. Sets FORCE_SSL_ADMIN constant.
 		'force_ssl_admin'               => false,
