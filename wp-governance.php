@@ -1,13 +1,19 @@
 <?php
 /**
  * Plugin Name: WP Governance
+ * Plugin URI: https://github.com/mperalty/wpgov
  * Description: File-based WordPress governance — restrict features, capabilities, and admin UI via config.
  * Version: 1.0.0
- * Author: WP Governance
+ * Author: Malcolm Peralty
+ * Author URI: https://peralty.com/
  * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: wp-governance
+ * Domain Path: /languages
  *
- * This is a must-use plugin. Drop it (along with the wp-governance/ directory)
- * into wp-content/mu-plugins/.
+ * This plugin can be activated as a normal plugin or installed as a must-use
+ * plugin by dropping this file and the wp-governance/ directory into
+ * wp-content/mu-plugins/.
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -13,13 +13,19 @@ defined( 'ABSPATH' ) || exit;
  */
 class Config {
 
-	/** @var array|null Cached config. */
+	/**
+	 * @var array|null Cached config.
+	 * @phpstan-var array<string, mixed>|null Cached config.
+	 */
 	private static ?array $config = null;
 
 	/** @var string Resolved config file path. */
 	private static string $path = '';
 
-	/** @var array|null Cached defaults from the shipped sample config. */
+	/**
+	 * @var array|null Cached defaults from the shipped sample config.
+	 * @phpstan-var array<string, mixed>|null Cached defaults from the shipped sample config.
+	 */
 	private static ?array $sample_defaults = null;
 
 	/** @var string Resolved environment override file path (empty if none). */
@@ -52,6 +58,8 @@ class Config {
 	 * Get the full governance config array.
 	 *
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	public static function get(): array {
 		if ( null !== self::$config ) {
@@ -64,7 +72,9 @@ class Config {
 		/**
 		 * Filter the governance config after loading.
 		 *
-		 * @param array  $config The loaded config array.
+		 * @param array $config The loaded config array.
+	 * @phpstan-param array<string, mixed> $config The loaded config array.
+	 * @psalm-param array $config The loaded config array.
 		 * @param string $path   The resolved config file path.
 		 */
 		self::$config = apply_filters( 'wp_governance_config', self::$config, self::$path );
@@ -149,6 +159,8 @@ class Config {
 	 * Get the fail-open config shape used at runtime.
 	 *
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	public static function defaults(): array {
 		return self::DEFAULTS;
@@ -162,6 +174,8 @@ class Config {
 	 * never activates extra governance rules by accident.
 	 *
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	public static function sample_defaults(): array {
 		if ( null !== self::$sample_defaults ) {
@@ -195,7 +209,11 @@ class Config {
 	 * Validate a raw config array and return non-fatal error messages.
 	 *
 	 * @param array $config Raw config array.
-	 * @return string[]
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @return array
+	 * @phpstan-return array<int, string>
+	 * @psalm-return array
 	 */
 	public static function validation_errors( array $config ): array {
 		$errors  = array();
@@ -226,6 +244,10 @@ class Config {
 			$errors[] = "'unrestricted_role' should be a string.";
 		}
 
+		/**
+	 * @var array $errors
+	 * @phpstan-var array<int, string> $errors
+	 */
 		return $errors;
 	}
 
@@ -240,7 +262,6 @@ class Config {
 	 * @return string
 	 */
 	private static function resolve_path(): string {
-		$path = '';
 
 		if ( defined( 'WP_GOVERNANCE_CONFIG' ) && WP_GOVERNANCE_CONFIG ) {
 			$path = (string) WP_GOVERNANCE_CONFIG;
@@ -261,6 +282,8 @@ class Config {
 	 *
 	 * @param string $path Absolute path to base config file.
 	 * @return array Validated config or empty array on failure.
+	 * @phpstan-return array<string, mixed> Validated config or empty array on failure.
+	 * @psalm-return array
 	 */
 	private static function load( string $path ): array {
 		$inspection = self::inspect_path( $path );
@@ -293,10 +316,10 @@ class Config {
 	 * @return array{
 	 *     base:mixed,
 	 *     override:mixed,
-	 *     effective:array|null,
+	 *     effective:array<string, mixed>|null,
 	 *     environment_path:string,
 	 *     loaded_environment_path:string,
-	 *     errors:string[]
+	 *     errors:array<int, string>
 	 * }
 	 */
 	public static function inspect_path( string $path ): array {
@@ -364,7 +387,11 @@ class Config {
 	 * defaults when they are explicitly configured.
 	 *
 	 * @param array $config Raw config array.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function normalize( array $config ): array {
 		$normalized                            = self::DEFAULTS;
@@ -400,7 +427,11 @@ class Config {
 	 *
 	 * @param mixed $value    Raw section value.
 	 * @param array $defaults Known boolean defaults.
+	 * @phpstan-param array<string, bool> $defaults Known boolean defaults.
+	 * @psalm-param array $defaults Known boolean defaults.
 	 * @return array
+	 * @phpstan-return array<string, bool>
+	 * @psalm-return array
 	 */
 	private static function normalize_boolean_section( $value, array $defaults ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -427,6 +458,8 @@ class Config {
 	 * @param mixed $value             Raw section value.
 	 * @param bool  $sanitize_with_key Whether to sanitize entries with sanitize_key().
 	 * @return array
+	 * @phpstan-return array<int, string>
+	 * @psalm-return array
 	 */
 	private static function normalize_string_list( $value, bool $sanitize_with_key ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -456,6 +489,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, array<int, string>>
+	 * @psalm-return array
 	 */
 	private static function normalize_deny_capabilities( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -486,6 +521,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, string>
+	 * @psalm-return array
 	 */
 	private static function normalize_mime_map( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -517,6 +554,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function normalize_uploads( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -537,6 +576,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function normalize_login( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -569,6 +610,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function normalize_content( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -606,6 +649,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function normalize_admin_footer( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -634,6 +679,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function normalize_post_types( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -680,6 +727,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function normalize_security( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -733,7 +782,9 @@ class Config {
 	 * - front_only (default: false)
 	 *
 	 * @param mixed $value Raw section value.
-	 * @return array<string, array{callback:mixed,hook:string,priority:int,admin_only:bool,front_only:bool}>
+	 * @return array
+	 * @phpstan-return array<string, array{callback:mixed,hook:string,priority:int,admin_only:bool,front_only:bool}>
+	 * @psalm-return array
 	 */
 	private static function normalize_custom_rules( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -840,10 +891,16 @@ class Config {
 	/**
 	 * Validate a boolean-keyed nested section.
 	 *
-	 * @param array  $config   Raw config array.
+	 * @param array $config Raw config array.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
 	 * @param string $section  Section name.
-	 * @param array  $defaults Allowed keys.
-	 * @param array  $errors   Error accumulator.
+	 * @param array $defaults Allowed keys.
+	 * @phpstan-param array<string, bool> $defaults Allowed keys.
+	 * @psalm-param array $defaults Allowed keys.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_boolean_section( array $config, string $section, array $defaults, array &$errors ): void {
 		if ( ! array_key_exists( $section, $config ) ) {
@@ -871,9 +928,13 @@ class Config {
 	/**
 	 * Validate a string list section.
 	 *
-	 * @param array  $config            Raw config array.
+	 * @param array $config Raw config array.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
 	 * @param string $section           Section name.
-	 * @param array  $errors            Error accumulator.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 * @param bool   $sanitize_with_key Whether values are expected to be key-like strings.
 	 */
 	private static function validate_string_list_section( array $config, string $section, array &$errors, bool $sanitize_with_key ): void {
@@ -904,7 +965,11 @@ class Config {
 	 * Validate deny capability map.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_deny_capabilities( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'deny_capabilities', $config ) ) {
@@ -940,7 +1005,11 @@ class Config {
 	 * Validate MIME allowlist map.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_mime_map( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'allowed_mime_types', $config ) ) {
@@ -964,7 +1033,11 @@ class Config {
 	 * Validate upload settings.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_uploads( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'uploads', $config ) ) {
@@ -994,7 +1067,11 @@ class Config {
 	 * Validate login settings.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_login( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'login', $config ) ) {
@@ -1023,7 +1100,11 @@ class Config {
 	 * Validate content settings.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_content( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'content', $config ) ) {
@@ -1070,7 +1151,11 @@ class Config {
 	 * Validate admin footer settings.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_admin_footer( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'admin_footer', $config ) ) {
@@ -1099,7 +1184,11 @@ class Config {
 	 * Validate post type settings.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_post_types( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'post_types', $config ) ) {
@@ -1151,7 +1240,11 @@ class Config {
 	 * Validate security settings.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_security( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'security', $config ) ) {
@@ -1189,7 +1282,11 @@ class Config {
 	 * Validate custom rules.
 	 *
 	 * @param array $config Raw config array.
-	 * @param array $errors Error accumulator.
+	 * @phpstan-param array<string, mixed> $config Raw config array.
+	 * @psalm-param array $config Raw config array.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_custom_rules( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'custom_rules', $config ) ) {
@@ -1247,10 +1344,10 @@ class Config {
 				}
 			}
 
-			if (
-				! empty( $rule['admin_only'] ) &&
-				! empty( $rule['front_only'] )
-			) {
+			$admin_only = isset( $rule['admin_only'] ) && self::normalize_bool( $rule['admin_only'] );
+			$front_only = isset( $rule['front_only'] ) && self::normalize_bool( $rule['front_only'] );
+
+			if ( $admin_only && $front_only ) {
 				$errors[] = "Custom rule '{$name}' cannot be both admin_only and front_only.";
 			}
 		}
@@ -1261,6 +1358,8 @@ class Config {
 	 *
 	 * @param mixed $value Raw section value.
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function normalize_locked_options( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
@@ -1279,8 +1378,12 @@ class Config {
 	/**
 	 * Validate the locked_options section.
 	 *
-	 * @param array    $config Raw config.
-	 * @param string[] $errors Error accumulator.
+	 * @param array $config Raw config.
+	 * @phpstan-param array<string, mixed> $config Raw config.
+	 * @psalm-param array $config Raw config.
+	 * @param array &$errors Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors Error accumulator.
+	 * @psalm-param array &$errors Error accumulator.
 	 */
 	private static function validate_locked_options( array $config, array &$errors ): void {
 		if ( ! array_key_exists( 'locked_options', $config ) ) {
@@ -1308,9 +1411,15 @@ class Config {
 	 * Add an error for unknown nested keys in a section.
 	 *
 	 * @param string   $section      Section name.
-	 * @param array    $values       Raw section values.
-	 * @param string[] $allowed_keys Allowed nested keys.
-	 * @param array    $errors       Error accumulator.
+	 * @param array $values       Raw section values.
+	 * @phpstan-param array<string, mixed> $values       Raw section values.
+	 * @psalm-param array $values       Raw section values.
+	 * @param array $allowed_keys Allowed nested keys.
+	 * @phpstan-param array<int, string> $allowed_keys Allowed nested keys.
+	 * @psalm-param array $allowed_keys Allowed nested keys.
+	 * @param array &$errors       Error accumulator.
+	 * @phpstan-param array<int|string, mixed> &$errors       Error accumulator.
+	 * @psalm-param array &$errors       Error accumulator.
 	 */
 	private static function validate_unknown_nested_keys( string $section, array $values, array $allowed_keys, array &$errors ): void {
 		$unknown = array_diff( array_keys( $values ), $allowed_keys );
@@ -1324,7 +1433,11 @@ class Config {
 	 * Check whether a section includes at least one known key.
 	 *
 	 * @param array $value    Raw section values.
+	 * @phpstan-param array<string, mixed> $value    Raw section values.
+	 * @psalm-param array $value    Raw section values.
 	 * @param array $defaults Known keys.
+	 * @phpstan-param array<string, mixed> $defaults Known keys.
+	 * @psalm-param array $defaults Known keys.
 	 * @return bool
 	 */
 	private static function has_known_keys( array $value, array $defaults ): bool {
@@ -1441,6 +1554,8 @@ class Config {
 	 * Neutral defaults for known feature flags.
 	 *
 	 * @return array
+	 * @phpstan-return array<string, bool>
+	 * @psalm-return array
 	 */
 	private static function feature_defaults(): array {
 		return array(
@@ -1473,6 +1588,8 @@ class Config {
 	 * Neutral defaults for login settings.
 	 *
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function login_defaults(): array {
 		return array(
@@ -1486,6 +1603,8 @@ class Config {
 	 * Neutral defaults for content settings.
 	 *
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function content_defaults(): array {
 		return array(
@@ -1502,6 +1621,8 @@ class Config {
 	 * Neutral defaults for head cleanup settings.
 	 *
 	 * @return array
+	 * @phpstan-return array<string, bool>
+	 * @psalm-return array
 	 */
 	private static function head_cleanup_defaults(): array {
 		return array(
@@ -1517,6 +1638,8 @@ class Config {
 	 * Neutral defaults for security settings.
 	 *
 	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private static function security_defaults(): array {
 		return array(
@@ -1566,7 +1689,7 @@ class Config {
 			return true;
 		}
 
-		if ( in_array( $role, (array) $user->roles, true ) ) {
+		if ( in_array( $role, $user->roles, true ) ) {
 			return true;
 		}
 
@@ -1577,7 +1700,7 @@ class Config {
 
 		$required_caps = array_keys(
 			array_filter(
-				(array) $role_object->capabilities
+				$role_object->capabilities
 			)
 		);
 
@@ -1629,8 +1752,14 @@ class Config {
 	 * Only include keys you want to change in the override file.
 	 *
 	 * @param array $base     Base config array.
+	 * @phpstan-param array<string, mixed> $base     Base config array.
+	 * @psalm-param array $base     Base config array.
 	 * @param array $override Override values.
+	 * @phpstan-param array<string, mixed> $override Override values.
+	 * @psalm-param array $override Override values.
 	 * @return array Merged result.
+	 * @phpstan-return array<string, mixed> Merged result.
+	 * @psalm-return array
 	 */
 	public static function deep_merge( array $base, array $override ): array {
 		foreach ( $override as $key => $value ) {

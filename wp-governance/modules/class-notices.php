@@ -11,8 +11,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class Notices {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<int, string>
+	 */
 	private array $notices;
 
+	/**
+	 * @param array $notices Notice identifiers.
+	 * @phpstan-param array<int, string> $notices Notice identifiers.
+	 * @psalm-param array $notices Notice identifiers.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $notices, array $config ) {
 		$this->notices = $notices;

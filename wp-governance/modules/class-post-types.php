@@ -14,8 +14,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class Post_Types {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<string, mixed>
+	 */
 	private array $settings;
 
+	/**
+	 * @param array $settings Post type settings.
+	 * @phpstan-param array<string, mixed> $settings Post type settings.
+	 * @psalm-param array $settings Post type settings.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $settings, array $config ) {
 		$this->settings = $settings;
@@ -24,7 +36,7 @@ class Post_Types {
 
 	private function register(): void {
 		$hidden = $this->settings['hidden'] ?? array();
-		if ( ! empty( $hidden ) ) {
+		if ( is_array( $hidden ) && array() !== $hidden ) {
 			add_action(
 				'admin_menu',
 				static function () use ( $hidden ): void {
@@ -54,8 +66,8 @@ class Post_Types {
 						$type = self::current_post_type( $typenow );
 						if ( in_array( $type, $hidden, true ) ) {
 							wp_die(
-								esc_html__( 'You do not have permission to access this post type.' ),
-								esc_html__( 'Restricted' ),
+								esc_html__( 'You do not have permission to access this post type.', 'wp-governance' ),
+								esc_html__( 'Restricted', 'wp-governance' ),
 								array(
 									'response'  => 403,
 									'back_link' => true,
@@ -69,7 +81,7 @@ class Post_Types {
 
 		// Disable post type supports.
 		$disable_supports = $this->settings['disable_supports'] ?? array();
-		if ( ! empty( $disable_supports ) ) {
+		if ( is_array( $disable_supports ) && array() !== $disable_supports ) {
 			add_action(
 				'init',
 				static function () use ( $disable_supports ): void {
@@ -96,9 +108,9 @@ class Post_Types {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only access check.
-		if ( isset( $_GET['post_type'] ) ) {
+		if ( isset( $_GET['post_type'] ) && ! is_array( $_GET['post_type'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only access check.
-			$post_type = sanitize_key( wp_unslash( (string) $_GET['post_type'] ) );
+			$post_type = sanitize_key( wp_unslash( $_GET['post_type'] ) );
 
 			if ( '' !== $post_type ) {
 				return $post_type;
@@ -106,9 +118,9 @@ class Post_Types {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only access check.
-		if ( isset( $_GET['post'] ) ) {
+		if ( isset( $_GET['post'] ) && ! is_array( $_GET['post'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only access check.
-			$post_id = absint( wp_unslash( (string) $_GET['post'] ) );
+			$post_id = absint( wp_unslash( $_GET['post'] ) );
 
 			if ( $post_id > 0 ) {
 				$post_type = get_post_type( $post_id );

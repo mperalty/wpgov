@@ -11,8 +11,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class Dashboard {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<int, string>
+	 */
 	private array $widgets;
 
+	/**
+	 * @param array $widgets Dashboard widget IDs.
+	 * @phpstan-param array<int, string> $widgets Dashboard widget IDs.
+	 * @psalm-param array $widgets Dashboard widget IDs.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $widgets, array $config ) {
 		$this->widgets = $widgets;

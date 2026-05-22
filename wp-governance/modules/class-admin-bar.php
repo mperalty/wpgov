@@ -11,8 +11,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class Admin_Bar {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<int, string>
+	 */
 	private array $nodes;
 
+	/**
+	 * @param array $nodes Admin bar node IDs.
+	 * @phpstan-param array<int, string> $nodes Admin bar node IDs.
+	 * @psalm-param array $nodes Admin bar node IDs.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $nodes, array $config ) {
 		$this->nodes = $nodes;

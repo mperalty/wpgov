@@ -12,8 +12,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class Admin_Menu {
 
+	/**
+	 * @var array
+	 * @phpstan-var array<int, string>
+	 */
 	private array $slugs;
 
+	/**
+	 * @param array $slugs Restricted menu slugs.
+	 * @phpstan-param array<int, string> $slugs Restricted menu slugs.
+	 * @psalm-param array $slugs Restricted menu slugs.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	public function __construct( array $slugs, array $config ) {
 		$this->slugs = $slugs;
@@ -65,8 +77,8 @@ class Admin_Menu {
 		foreach ( $this->slugs as $slug ) {
 			if ( $this->request_matches_slug( $slug ) ) {
 				wp_die(
-					esc_html__( 'You do not have permission to access this page.' ),
-					esc_html__( 'Restricted' ),
+					esc_html__( 'You do not have permission to access this page.', 'wp-governance' ),
+					esc_html__( 'Restricted', 'wp-governance' ),
 					array(
 						'response'  => 403,
 						'back_link' => true,
@@ -123,7 +135,9 @@ class Admin_Menu {
 	/**
 	 * Get the normalized current request query arguments.
 	 *
-	 * @return array<string, mixed>
+	 * @return array
+	 * @phpstan-return array<string, mixed>
+	 * @psalm-return array
 	 */
 	private function current_request_args(): array {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only access check.

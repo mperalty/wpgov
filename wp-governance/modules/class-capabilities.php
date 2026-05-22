@@ -14,15 +14,32 @@ defined( 'ABSPATH' ) || exit;
  */
 class Capabilities {
 
-	/** @var array<string, string[]> Role => denied caps. */
+	/**
+	 * @var array denied caps.
+	 * @phpstan-var array<string, string[]> Role => denied caps.
+	 */
 	private array $deny_map;
 
-	/** @var array<string, array<string, bool>> Pre-filtered deny map lookups keyed by role. */
+	/**
+	 * @var array Pre-filtered deny map lookups keyed by role.
+	 * @phpstan-var array<string, array<string, bool>> Pre-filtered deny map lookups keyed by role.
+	 */
 	private array $filtered_deny_cache = array();
 
-	/** @var array<string, array<string, bool>> Merged deny lookups keyed by sorted role list. */
+	/**
+	 * @var array Merged deny lookups keyed by sorted role list.
+	 * @phpstan-var array<string, array<string, bool>> Merged deny lookups keyed by sorted role list.
+	 */
 	private array $merged_deny_cache = array();
 
+	/**
+	 * @param array $deny_map Role => denied caps.
+	 * @phpstan-param array<string, array<int, string>> $deny_map Role => denied caps.
+	 * @psalm-param array $deny_map Role => denied caps.
+	 * @param array $config Governance config.
+	 * @phpstan-param array<string, mixed> $config Governance config.
+	 * @psalm-param array $config Governance config.
+	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Consistent module interface.
 	public function __construct( array $deny_map, array $config ) {
 		$this->deny_map = $deny_map;
@@ -37,7 +54,9 @@ class Capabilities {
 	 * Get a denied-capability lookup for a role, applying the filter once.
 	 *
 	 * @param string $role Role slug.
-	 * @return array<string, bool>
+	 * @return array
+	 * @phpstan-return array<string, bool>
+	 * @psalm-return array
 	 */
 	private function get_denied_for_role( string $role ): array {
 		if ( ! isset( $this->filtered_deny_cache[ $role ] ) ) {
@@ -68,7 +87,9 @@ class Capabilities {
 	 * Merge denied capabilities for the user's roles once per unique role set.
 	 *
 	 * @param string[] $roles Role slugs.
-	 * @return array<string, bool>
+	 * @return array
+	 * @phpstan-return array<string, bool>
+	 * @psalm-return array
 	 */
 	private function get_denied_for_roles( array $roles ): array {
 		$roles = array_values(
@@ -103,11 +124,19 @@ class Capabilities {
 	/**
 	 * Filter user capabilities at runtime.
 	 *
-	 * @param bool[]   $allcaps All capabilities for the user.
-	 * @param string[] $caps    Required primitive capabilities for the requested check.
-	 * @param array    $args    [0] = requested capability, [1] = user ID.
-	 * @param \WP_User $user    The user object.
-	 * @return bool[]
+	 * @param array $allcaps All capabilities for the user.
+	 * @phpstan-param array<string, bool> $allcaps All capabilities for the user.
+	 * @psalm-param array $allcaps All capabilities for the user.
+	 * @param array $caps Required primitive capabilities for the requested check.
+	 * @phpstan-param array<int, string> $caps Required primitive capabilities for the requested check.
+	 * @psalm-param array $caps Required primitive capabilities for the requested check.
+	 * @param array $args [0] = requested capability, [1] = user ID.
+	 * @phpstan-param array<int|string, mixed> $args [0] = requested capability, [1] = user ID.
+	 * @psalm-param array $args [0] = requested capability, [1] = user ID.
+	 * @param \WP_User $user The user object.
+	 * @return array
+	 * @phpstan-return array<string, bool>
+	 * @psalm-return array
 	 */
 	public function filter_caps( array $allcaps, array $caps, array $args, \WP_User $user ): array {
 		// Unrestricted users bypass.
@@ -115,7 +144,7 @@ class Capabilities {
 			return $allcaps;
 		}
 
-		$denied = $this->get_denied_for_roles( (array) $user->roles );
+		$denied = $this->get_denied_for_roles( $user->roles );
 		if ( empty( $denied ) ) {
 			return $allcaps;
 		}
