@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Governance Guardrails provides file-based rules for managing WordPress admin behavior, capabilities, upload rules, and operational hardening from code.
+Governance Guardrails provides file-based rules for managing admin behavior, capabilities, uploads, and operational hardening from code.
 
 == Description ==
 

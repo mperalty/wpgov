@@ -377,7 +377,7 @@ class Features {
 	 */
 	private function disable_file_mods(): void {
 		if ( ! defined( 'DISALLOW_FILE_MODS' ) ) {
-			define( 'DISALLOW_FILE_MODS', true );
+			define( 'DISALLOW_FILE_MODS', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Core constant.
 		}
 	}
 
