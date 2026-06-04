@@ -161,6 +161,7 @@ class Features {
 
 		if ( $this->on( 'disable_wp_cron' ) ) {
 			if ( ! defined( 'DISABLE_WP_CRON' ) ) {
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WordPress core constant.
 				define( 'DISABLE_WP_CRON', true );
 			}
 		}
@@ -217,6 +218,7 @@ class Features {
 	 */
 	private function disable_file_editor(): void {
 		if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WordPress core constant.
 			define( 'DISALLOW_FILE_EDIT', true );
 		}
 	}

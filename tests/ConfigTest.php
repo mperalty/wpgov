@@ -52,6 +52,39 @@ class ConfigTest extends WP_UnitTestCase {
         $this->filters_to_remove[] = [ 'govguard_environment_config_path', $callback, 1 ];
     }
 
+    // ── Regression ───────────────────────────────────────────────
+
+    /**
+     * current_user_is_unrestricted() must not recurse when called while
+     * WordPress is still resolving the current user.
+     *
+     * The disable_application_passwords feature filters
+     * wp_is_application_passwords_available(), which runs during
+     * `determine_current_user`. That callback calls this method; before the
+     * fix it then called wp_get_current_user(), re-entering the auth filters
+     * and recursing until memory was exhausted (fatal under WP-CLI / REST).
+     */
+    public function test_unrestricted_check_is_safe_during_user_determination(): void {
+        $result   = 'did-not-run';
+        $callback = static function ( $user_id ) use ( &$result ) {
+            $result = Config::current_user_is_unrestricted();
+            return $user_id;
+        };
+
+        add_filter( 'determine_current_user', $callback, 1 );
+        $this->filters_to_remove[] = [ 'determine_current_user', $callback, 1 ];
+
+        // Force WordPress to re-resolve the current user, firing the callback.
+        $previous                = $GLOBALS['current_user'] ?? null;
+        $GLOBALS['current_user'] = null;
+        wp_get_current_user();
+        $GLOBALS['current_user'] = $previous;
+
+        // Completed without infinite recursion, and reported "restricted"
+        // because the user was still being determined.
+        $this->assertFalse( $result, 'Unrestricted check must short-circuit during user determination.' );
+    }
+
     // ── Loading ──────────────────────────────────────────────────
 
     public function test_loads_valid_config_file(): void {
