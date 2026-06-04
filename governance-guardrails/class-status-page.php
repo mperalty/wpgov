@@ -1,6 +1,6 @@
 <?php
 
-namespace WP_Governance;
+namespace GovGuard;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -63,7 +63,7 @@ class Status_Page {
 		// Meta info.
 		echo '<table class="widefat fixed striped" style="max-width:600px;margin-bottom:20px;">';
 		echo '<tbody>';
-		$this->meta_row( __( 'Plugin Version', 'governance-guardrails' ), WP_GOVERNANCE_VERSION );
+		$this->meta_row( __( 'Plugin Version', 'governance-guardrails' ), GOVGUARD_VERSION );
 		$this->meta_row( __( 'Config File', 'governance-guardrails' ), $path );
 		$this->meta_row( __( 'Last Modified', 'governance-guardrails' ), $modified );
 		$this->meta_row( __( 'Unrestricted Role', 'governance-guardrails' ), $this->config['unrestricted_role'] ?? 'administrator' );

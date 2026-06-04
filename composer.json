@@ -1,5 +1,5 @@
 {
-    "name": "wpgov/wp-governance",
+    "name": "wpgov/governance-guardrails",
     "description": "File-based WordPress governance mu-plugin — restrict features, capabilities, and admin UI via config.",
     "type": "wordpress-muplugin",
     "license": "GPL-2.0-or-later",
@@ -22,7 +22,7 @@
     },
     "autoload": {
         "classmap": [
-            "wp-governance/"
+            "governance-guardrails/"
         ]
     },
     "scripts": {

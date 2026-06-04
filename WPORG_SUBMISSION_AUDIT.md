@@ -2,7 +2,7 @@
 
 Audit date: 2026-05-22
 Plugin: Governance Guardrails
-Intended WordPress.org slug: `wp-governance`
+Intended WordPress.org slug: `governance-guardrails`
 Repository: https://github.com/mperalty/wpgov
 
 ## Scope
@@ -38,13 +38,13 @@ The readme describes both normal plugin installation and must-use plugin install
 
 ### 2. Plugin header
 
-Updated `wp-governance.php` to include WordPress.org-ready metadata:
+Updated `governance-guardrails.php` to include WordPress.org-ready metadata:
 
 - Plugin URI: `https://github.com/mperalty/wpgov`
 - Author: `Malcolm Peralty`
 - Author URI: `https://peralty.com/`
 - License URI: `https://www.gnu.org/licenses/gpl-2.0.html`
-- Text Domain: `wp-governance`
+- Text Domain: `governance-guardrails`
 - Domain Path: `/languages`
 
 The header now states that the plugin can be activated as a normal plugin or installed as a must-use plugin.
@@ -59,22 +59,22 @@ Added `languages/.gitkeep` because the plugin header declares `Domain Path: /lan
 
 ### 5. Admin access hardening
 
-Added an explicit runtime access check to `WP_Governance\Status_Page::render()`.
+Added an explicit runtime access check to `GovGuard\Status_Page::render()`.
 
 The status page was already registered only for users who pass `Config::current_user_is_unrestricted()`, but the render callback now also blocks direct access with a 403 response if the current user is not unrestricted.
 
 ### 6. Text domain cleanup
 
-Added the `wp-governance` text domain to runtime translation calls found in:
+Added the `governance-guardrails` text domain to runtime translation calls found in:
 
-- `wp-governance/class-status-page.php`
-- `wp-governance/modules/class-admin-menu.php`
-- `wp-governance/modules/class-features.php`
-- `wp-governance/modules/class-login.php`
-- `wp-governance/modules/class-post-types.php`
-- `wp-governance/modules/class-uploads.php`
+- `governance-guardrails/class-status-page.php`
+- `governance-guardrails/modules/class-admin-menu.php`
+- `governance-guardrails/modules/class-features.php`
+- `governance-guardrails/modules/class-login.php`
+- `governance-guardrails/modules/class-post-types.php`
+- `governance-guardrails/modules/class-uploads.php`
 
-A follow-up search found no remaining simple runtime translation calls in `wp-governance/` without an explicit text domain.
+A follow-up search found no remaining simple runtime translation calls in `governance-guardrails/` without an explicit text domain.
 
 ## Findings
 
@@ -125,7 +125,7 @@ The plugin filters option reads and update attempts to pin selected settings fro
 ## Verification performed
 
 - Confirmed `readme.txt` exists and uses WordPress.org section/header format.
-- Confirmed plugin header metadata is present in `wp-governance.php`.
+- Confirmed plugin header metadata is present in `governance-guardrails.php`.
 - Confirmed `LICENSE` now begins with `GNU GENERAL PUBLIC LICENSE Version 2, June 1991`.
 - Searched runtime PHP files for obvious remote calls, file writes, eval/obfuscation patterns, direct DB usage, request superglobals, and missing simple text-domain calls.
 

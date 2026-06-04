@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $paths = array(
-	$root . DIRECTORY_SEPARATOR . 'wp-governance.php',
-	$root . DIRECTORY_SEPARATOR . 'wp-governance',
+	$root . DIRECTORY_SEPARATOR . 'governance-guardrails.php',
+	$root . DIRECTORY_SEPARATOR . 'governance-guardrails',
 	$root . DIRECTORY_SEPARATOR . 'tests',
 	$root . DIRECTORY_SEPARATOR . 'bin',
 );

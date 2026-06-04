@@ -1,8 +1,8 @@
 <?php
 
-namespace WP_Governance\Modules;
+namespace GovGuard\Modules;
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,7 +38,7 @@ class Admin_Menu {
 		 *
 		 * @param array $slugs Menu page slugs.
 		 */
-		$this->slugs = apply_filters( 'wp_governance_restrict_menu', $this->slugs );
+		$this->slugs = apply_filters( 'govguard_restrict_menu', $this->slugs );
 
 		// Remove menu items at a late priority so other plugins have registered theirs.
 		add_action( 'admin_menu', array( $this, 'remove_menus' ), 999 );

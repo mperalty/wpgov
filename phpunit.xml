@@ -2,10 +2,10 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/bootstrap.php" backupGlobals="false" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
   <coverage processUncoveredFiles="true">
     <include>
-      <directory suffix=".php">./wp-governance</directory>
+      <directory suffix=".php">./governance-guardrails</directory>
     </include>
     <exclude>
-      <file>./wp-governance/wp-governance-config.php</file>
+      <file>./governance-guardrails/governance-guardrails-config.php</file>
     </exclude>
   </coverage>
   <testsuites>

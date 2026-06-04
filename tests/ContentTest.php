@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Content module.
@@ -83,7 +83,7 @@ class ContentTest extends WP_UnitTestCase {
     }
 
     private function load_module(array $settings): void {
-        require_once WP_GOVERNANCE_DIR . 'modules/class-content.php';
-        new \WP_Governance\Modules\Content($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-content.php';
+        new \GovGuard\Modules\Content($settings, Config::get());
     }
 }

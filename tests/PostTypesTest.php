@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Post Types module.
@@ -48,8 +48,8 @@ class PostTypesTest extends WP_UnitTestCase {
             ],
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-post-types.php';
-        new \WP_Governance\Modules\Post_Types( $settings, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-post-types.php';
+        new \GovGuard\Modules\Post_Types( $settings, Config::get() );
 
         // Fire init to trigger the support removal.
         do_action( 'init' );
@@ -67,8 +67,8 @@ class PostTypesTest extends WP_UnitTestCase {
             'disable_supports' => [],
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-post-types.php';
-        new \WP_Governance\Modules\Post_Types( $settings, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-post-types.php';
+        new \GovGuard\Modules\Post_Types( $settings, Config::get() );
 
         // Post should still support everything.
         $this->assertTrue( post_type_supports( 'post', 'title' ) );
@@ -81,8 +81,8 @@ class PostTypesTest extends WP_UnitTestCase {
             'disable_supports' => [],
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-post-types.php';
-        new \WP_Governance\Modules\Post_Types( $settings, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-post-types.php';
+        new \GovGuard\Modules\Post_Types( $settings, Config::get() );
 
         // Set up a restricted user.
         $editor_id = self::factory()->user->create( [ 'role' => 'editor' ] );
@@ -113,8 +113,8 @@ class PostTypesTest extends WP_UnitTestCase {
             'disable_supports' => [],
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-post-types.php';
-        new \WP_Governance\Modules\Post_Types( $settings, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-post-types.php';
+        new \GovGuard\Modules\Post_Types( $settings, Config::get() );
 
         // Create a page so we can reference it by ID.
         $page_id = self::factory()->post->create( [ 'post_type' => 'page' ] );
@@ -148,8 +148,8 @@ class PostTypesTest extends WP_UnitTestCase {
             'disable_supports' => [],
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-post-types.php';
-        new \WP_Governance\Modules\Post_Types( $settings, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-post-types.php';
+        new \GovGuard\Modules\Post_Types( $settings, Config::get() );
 
         // Admin is unrestricted.
         $admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );

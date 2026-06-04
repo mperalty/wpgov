@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Config loader.
@@ -37,8 +37,8 @@ class ConfigTest extends WP_UnitTestCase {
         $callback = static function () use ( $path ): string {
             return $path;
         };
-        add_filter( 'wp_governance_config_path', $callback, 1 );
-        $this->filters_to_remove[] = [ 'wp_governance_config_path', $callback, 1 ];
+        add_filter( 'govguard_config_path', $callback, 1 );
+        $this->filters_to_remove[] = [ 'govguard_config_path', $callback, 1 ];
     }
 
     /**
@@ -48,8 +48,8 @@ class ConfigTest extends WP_UnitTestCase {
         $callback = static function () use ( $path ): string {
             return $path;
         };
-        add_filter( 'wp_governance_environment_config_path', $callback, 1 );
-        $this->filters_to_remove[] = [ 'wp_governance_environment_config_path', $callback, 1 ];
+        add_filter( 'govguard_environment_config_path', $callback, 1 );
+        $this->filters_to_remove[] = [ 'govguard_environment_config_path', $callback, 1 ];
     }
 
     // ── Loading ──────────────────────────────────────────────────
@@ -279,13 +279,13 @@ class ConfigTest extends WP_UnitTestCase {
 
     // ── Filter ───────────────────────────────────────────────────
 
-    public function test_wp_governance_config_filter(): void {
+    public function test_govguard_config_filter(): void {
         $callback = static function ( array $config ): array {
             $config['features']['injected_toggle'] = true;
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
         $config = Config::get();
@@ -293,15 +293,15 @@ class ConfigTest extends WP_UnitTestCase {
         $this->assertTrue( $config['features']['injected_toggle'] );
     }
 
-    public function test_wp_governance_feature_enabled_filter(): void {
+    public function test_govguard_feature_enabled_filter(): void {
         $callback = static function ( bool $enabled, string $feature ): bool {
             if ( $feature === 'override_test' ) {
                 return true;
             }
             return $enabled;
         };
-        add_filter( 'wp_governance_feature_enabled', $callback, 10, 2 );
-        $this->filters_to_remove[] = [ 'wp_governance_feature_enabled', $callback, 10 ];
+        add_filter( 'govguard_feature_enabled', $callback, 10, 2 );
+        $this->filters_to_remove[] = [ 'govguard_feature_enabled', $callback, 10 ];
 
         $this->assertTrue( Config::feature_enabled( 'override_test' ) );
     }
@@ -348,8 +348,8 @@ class ConfigTest extends WP_UnitTestCase {
             $config['unrestricted_role'] = 'editor';
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
 
@@ -364,8 +364,8 @@ class ConfigTest extends WP_UnitTestCase {
             $config['unrestricted_role'] = 'totally_fake_role';
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
 
@@ -381,8 +381,8 @@ class ConfigTest extends WP_UnitTestCase {
             $config['unrestricted_role'] = 'editor';
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
 
@@ -398,8 +398,8 @@ class ConfigTest extends WP_UnitTestCase {
             $config['unrestricted_role'] = 'editor';
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
 
@@ -418,8 +418,8 @@ class ConfigTest extends WP_UnitTestCase {
             $config['unrestricted_role'] = 'empty_role';
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
 
@@ -543,8 +543,8 @@ class ConfigTest extends WP_UnitTestCase {
             $config['unrestricted_role'] = 'governance_admin';
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
 

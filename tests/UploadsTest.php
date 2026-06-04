@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Uploads module.
@@ -61,7 +61,7 @@ class UploadsTest extends WP_UnitTestCase {
         $this->assertSame( $defaults, $result );
     }
 
-    public function test_wp_governance_allowed_mimes_filter(): void {
+    public function test_govguard_allowed_mimes_filter(): void {
         $allowed = [
             'jpg|jpeg|jpe' => 'image/jpeg',
         ];
@@ -72,8 +72,8 @@ class UploadsTest extends WP_UnitTestCase {
             $mimes['svg'] = 'image/svg+xml';
             return $mimes;
         };
-        add_filter( 'wp_governance_allowed_mimes', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_allowed_mimes', $callback, 10 ];
+        add_filter( 'govguard_allowed_mimes', $callback );
+        $this->filters_to_remove[] = [ 'govguard_allowed_mimes', $callback, 10 ];
 
         $result = apply_filters( 'upload_mimes', wp_get_mime_types() );
 
@@ -149,8 +149,8 @@ class UploadsTest extends WP_UnitTestCase {
             ++$calls;
             return $mimes;
         };
-        add_filter( 'wp_governance_allowed_mimes', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_allowed_mimes', $callback, 10 ];
+        add_filter( 'govguard_allowed_mimes', $callback );
+        $this->filters_to_remove[] = [ 'govguard_allowed_mimes', $callback, 10 ];
 
         $payload = [
             'ext'             => 'jpg',
@@ -209,8 +209,8 @@ class UploadsTest extends WP_UnitTestCase {
     }
 
     private function load_module( array $allowed, array $uploads = [] ): void {
-        require_once WP_GOVERNANCE_DIR . 'modules/class-uploads.php';
-        new \WP_Governance\Modules\Uploads(
+        require_once GOVGUARD_DIR . 'modules/class-uploads.php';
+        new \GovGuard\Modules\Uploads(
             $allowed,
             array_merge(
                 Config::get(),
@@ -229,7 +229,7 @@ class UploadsTest extends WP_UnitTestCase {
     private function governance_hooks(): array {
         return [
             'upload_mimes',
-            'wp_governance_allowed_mimes',
+            'govguard_allowed_mimes',
             'wp_check_filetype_and_ext',
             'upload_size_limit',
             'wp_handle_upload_prefilter',

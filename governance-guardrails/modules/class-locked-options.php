@@ -1,6 +1,6 @@
 <?php
 
-namespace WP_Governance\Modules;
+namespace GovGuard\Modules;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,7 +43,7 @@ class Locked_Options {
 	private function lock(): void {
 		foreach ( $this->options as $name => $value ) {
 			// Override reads — return the config value instead of the database.
-			add_filter( "pre_option_{$name}", static fn(): string => $value );
+			add_filter( "pre_option_{$name}", static fn(): mixed => $value );
 
 			// Block writes — return the old value so update_option() sees no change.
 			add_filter(

@@ -1,7 +1,7 @@
 <?php
 
-use WP_Governance\Config;
-use WP_Governance\Governance;
+use GovGuard\Config;
+use GovGuard\Governance;
 
 /**
  * Tests for the Governance orchestrator.
@@ -34,13 +34,13 @@ class GovernanceTest extends WP_UnitTestCase {
 
     // ── Module Loading ───────────────────────────────────────────
 
-    public function test_wp_governance_before_enforce_fires(): void {
+    public function test_govguard_before_enforce_fires(): void {
         $fired = false;
         $callback = static function () use ( &$fired ): void {
             $fired = true;
         };
-        add_action( 'wp_governance_before_enforce', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_before_enforce', $callback, 10 ];
+        add_action( 'govguard_before_enforce', $callback );
+        $this->filters_to_remove[] = [ 'govguard_before_enforce', $callback, 10 ];
 
         // Re-instantiate to trigger boot.
         $this->boot_fresh_instance();
@@ -48,15 +48,15 @@ class GovernanceTest extends WP_UnitTestCase {
         $this->assertTrue( $fired );
     }
 
-    public function test_wp_governance_loaded_fires_with_config_and_modules(): void {
+    public function test_govguard_loaded_fires_with_config_and_modules(): void {
         $captured_config  = null;
         $captured_modules = null;
         $callback = static function ( array $config, array $modules ) use ( &$captured_config, &$captured_modules ): void {
             $captured_config  = $config;
             $captured_modules = $modules;
         };
-        add_action( 'wp_governance_loaded', $callback, 10, 2 );
-        $this->filters_to_remove[] = [ 'wp_governance_loaded', $callback, 10 ];
+        add_action( 'govguard_loaded', $callback, 10, 2 );
+        $this->filters_to_remove[] = [ 'govguard_loaded', $callback, 10 ];
 
         $this->boot_fresh_instance();
 
@@ -93,8 +93,8 @@ class GovernanceTest extends WP_UnitTestCase {
             ];
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         $modules = $this->capture_loaded_modules();
 
@@ -107,8 +107,8 @@ class GovernanceTest extends WP_UnitTestCase {
             $config['uploads']            = [ 'max_upload_size_mb' => 5 ];
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         $modules = $this->capture_loaded_modules();
 
@@ -121,8 +121,8 @@ class GovernanceTest extends WP_UnitTestCase {
             $config['uploads']            = [];
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         $modules = $this->capture_loaded_modules();
 
@@ -139,8 +139,8 @@ class GovernanceTest extends WP_UnitTestCase {
             $config['custom_rules'] = [ 'test_rule' => $rule ];
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         $this->boot_fresh_instance();
 
@@ -168,8 +168,8 @@ class GovernanceTest extends WP_UnitTestCase {
             ];
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         if ( function_exists( 'set_current_screen' ) ) {
             set_current_screen( 'front' );
@@ -200,8 +200,8 @@ class GovernanceTest extends WP_UnitTestCase {
             ];
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         if ( function_exists( 'set_current_screen' ) ) {
             set_current_screen( 'front' );
@@ -229,8 +229,8 @@ class GovernanceTest extends WP_UnitTestCase {
             ];
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         $this->boot_fresh_instance();
 
@@ -246,8 +246,8 @@ class GovernanceTest extends WP_UnitTestCase {
             $config['custom_rules'] = [ 'bad_rule' => 'definitely_not_a_function_that_exists' ];
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         // Capture modules — uncallable rules should not appear.
         $modules = $this->capture_loaded_modules();
@@ -274,8 +274,8 @@ class GovernanceTest extends WP_UnitTestCase {
         $callback = static function () use ( $path ): string {
             return $path;
         };
-        add_filter( 'wp_governance_config_path', $callback, 1 );
-        $this->filters_to_remove[] = [ 'wp_governance_config_path', $callback, 1 ];
+        add_filter( 'govguard_config_path', $callback, 1 );
+        $this->filters_to_remove[] = [ 'govguard_config_path', $callback, 1 ];
         Config::reset();
     }
 
@@ -302,8 +302,8 @@ class GovernanceTest extends WP_UnitTestCase {
         $callback = static function ( array $config, array $modules ) use ( &$captured ): void {
             $captured = $modules;
         };
-        add_action( 'wp_governance_loaded', $callback, 10, 2 );
-        $this->filters_to_remove[] = [ 'wp_governance_loaded', $callback, 10 ];
+        add_action( 'govguard_loaded', $callback, 10, 2 );
+        $this->filters_to_remove[] = [ 'govguard_loaded', $callback, 10 ];
 
         $this->boot_fresh_instance();
 

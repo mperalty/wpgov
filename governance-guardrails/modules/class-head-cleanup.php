@@ -1,6 +1,6 @@
 <?php
 
-namespace WP_Governance\Modules;
+namespace GovGuard\Modules;
 
 defined( 'ABSPATH' ) || exit;
 

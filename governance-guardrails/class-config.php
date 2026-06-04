@@ -1,6 +1,6 @@
 <?php
 
-namespace WP_Governance;
+namespace GovGuard;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -77,7 +77,7 @@ class Config {
 	 * @psalm-param array $config The loaded config array.
 		 * @param string $path   The resolved config file path.
 		 */
-		self::$config = apply_filters( 'wp_governance_config', self::$config, self::$path );
+		self::$config = apply_filters( 'govguard_config', self::$config, self::$path );
 
 		return self::$config;
 	}
@@ -110,7 +110,7 @@ class Config {
 		 * @param bool   $enabled Whether the feature is enabled.
 		 * @param string $feature The feature key.
 		 */
-		return (bool) apply_filters( 'wp_governance_feature_enabled', $enabled, $feature );
+		return (bool) apply_filters( 'govguard_feature_enabled', $enabled, $feature );
 	}
 
 	/**
@@ -182,7 +182,7 @@ class Config {
 			return self::$sample_defaults;
 		}
 
-		$path = __DIR__ . '/wp-governance-config.php';
+		$path = __DIR__ . '/governance-guardrails-config.php';
 		if ( ! is_readable( $path ) ) {
 			self::$sample_defaults = self::DEFAULTS;
 			return self::$sample_defaults;
@@ -255,18 +255,18 @@ class Config {
 	 * Determine where the config file lives.
 	 *
 	 * Priority:
-	 * 1. wp_governance_config_path filter (allows runtime override, useful for tests)
-	 * 2. WP_GOVERNANCE_CONFIG constant
+	 * 1. govguard_config_path filter (allows runtime override, useful for tests)
+	 * 2. GOVGUARD_CONFIG constant
 	 * 3. Default location beside the mu-plugin loader
 	 *
 	 * @return string
 	 */
 	private static function resolve_path(): string {
 
-		if ( defined( 'WP_GOVERNANCE_CONFIG' ) && WP_GOVERNANCE_CONFIG ) {
-			$path = (string) WP_GOVERNANCE_CONFIG;
+		if ( defined( 'GOVGUARD_CONFIG' ) && GOVGUARD_CONFIG ) {
+			$path = (string) GOVGUARD_CONFIG;
 		} else {
-			$path = WP_GOVERNANCE_DIR . 'wp-governance-config.php';
+			$path = GOVGUARD_DIR . 'governance-guardrails-config.php';
 		}
 
 		/**
@@ -274,7 +274,7 @@ class Config {
 		 *
 		 * @param string $path The resolved config file path.
 		 */
-		return (string) apply_filters( 'wp_governance_config_path', $path );
+		return (string) apply_filters( 'govguard_config_path', $path );
 	}
 
 	/**
@@ -1719,8 +1719,8 @@ class Config {
 	/**
 	 * Determine the environment-specific override file path.
 	 *
-	 * Given a base config path like `/path/to/wp-governance-config.php`,
-	 * looks for `/path/to/wp-governance-config.{environment}.php`.
+	 * Given a base config path like `/path/to/governance-guardrails-config.php`,
+	 * looks for `/path/to/governance-guardrails-config.{environment}.php`.
 	 *
 	 * @param string $base_path Base config file path.
 	 * @return string Override file path if readable, empty string otherwise.
@@ -1738,7 +1738,7 @@ class Config {
 		 * @param string $environment Current environment type.
 		 * @param string $base_path   Base config file path.
 		 */
-		$path = (string) apply_filters( 'wp_governance_environment_config_path', $path, $env, $base_path );
+		$path = (string) apply_filters( 'govguard_environment_config_path', $path, $env, $base_path );
 
 		return is_readable( $path ) ? $path : '';
 	}

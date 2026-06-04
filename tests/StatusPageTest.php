@@ -1,9 +1,9 @@
 <?php
 
-use WP_Governance\Config;
-use WP_Governance\Status_Page;
+use GovGuard\Config;
+use GovGuard\Status_Page;
 
-require_once WP_GOVERNANCE_DIR . 'class-status-page.php';
+require_once GOVGUARD_DIR . 'class-status-page.php';
 
 /**
  * Tests for the governance status page.
@@ -49,7 +49,7 @@ class StatusPageTest extends WP_UnitTestCase {
         $page = new Status_Page( Config::get() );
         $page->register_page();
 
-        $this->assertNotContains( 'wp-governance', $this->tools_menu_slugs() );
+        $this->assertNotContains( 'governance-guardrails', $this->tools_menu_slugs() );
     }
 
     public function test_register_page_allows_higher_roles_when_lower_unrestricted_role_is_configured(): void {
@@ -57,8 +57,8 @@ class StatusPageTest extends WP_UnitTestCase {
             $config['unrestricted_role'] = 'editor';
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
         $this->prime_tools_menu();
@@ -69,7 +69,7 @@ class StatusPageTest extends WP_UnitTestCase {
         $page = new Status_Page( Config::get() );
         $page->register_page();
 
-        $this->assertContains( 'wp-governance', $this->tools_menu_slugs() );
+        $this->assertContains( 'governance-guardrails', $this->tools_menu_slugs() );
     }
 
     public function test_render_outputs_custom_rule_metadata(): void {
@@ -139,7 +139,7 @@ class StatusPageTest extends WP_UnitTestCase {
         }
 
         foreach ( $submenu['tools.php'] as $index => $entry ) {
-            if ( ( $entry[2] ?? '' ) === 'wp-governance' ) {
+            if ( ( $entry[2] ?? '' ) === 'governance-guardrails' ) {
                 unset( $submenu['tools.php'][ $index ] );
             }
         }

@@ -35,16 +35,16 @@ require_once $wp_tests_dir . '/includes/functions.php';
 tests_add_filter(
 	'muplugins_loaded',
 	function () use ( $project_root ) {
-		if ( ! defined( 'WP_GOVERNANCE_VERSION' ) ) {
-			define( 'WP_GOVERNANCE_VERSION', '1.0.0-test' );
+		if ( ! defined( 'GOVGUARD_VERSION' ) ) {
+			define( 'GOVGUARD_VERSION', '1.0.0-test' );
 		}
 
-		if ( ! defined( 'WP_GOVERNANCE_DIR' ) ) {
-			define( 'WP_GOVERNANCE_DIR', $project_root . '/wp-governance/' );
+		if ( ! defined( 'GOVGUARD_DIR' ) ) {
+			define( 'GOVGUARD_DIR', $project_root . '/governance-guardrails/' );
 		}
 
-		require_once WP_GOVERNANCE_DIR . 'class-config.php';
-		require_once WP_GOVERNANCE_DIR . 'class-governance.php';
+		require_once GOVGUARD_DIR . 'class-config.php';
+		require_once GOVGUARD_DIR . 'class-governance.php';
 	}
 );
 

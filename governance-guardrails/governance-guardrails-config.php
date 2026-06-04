@@ -6,12 +6,12 @@
  * Toggle features by setting values to true/false. Changes take effect immediately
  * on the next page load — no database writes, no cache to clear.
  *
- * To use a custom path for this file, define WP_GOVERNANCE_CONFIG in wp-config.php:
- *     define('WP_GOVERNANCE_CONFIG', '/path/to/governance-config.php');
+ * To use a custom path for this file, define GOVGUARD_CONFIG in wp-config.php:
+ *     define('GOVGUARD_CONFIG', '/path/to/governance-config.php');
  *
  * Environment-specific overrides:
- *     Create a file named wp-governance-config.{environment}.php alongside this
- *     file (e.g. wp-governance-config.local.php) and it will be deep-merged on
+ *     Create a file named governance-guardrails-config.{environment}.php alongside this
+ *     file (e.g. governance-guardrails-config.local.php) and it will be deep-merged on
  *     top of this base config. The environment is read from WP_ENVIRONMENT_TYPE.
  *     Only include the keys you want to override — everything else inherits.
  */
@@ -80,7 +80,9 @@ return array(
 		// This does not alter WordPress.org update routines.
 		'disable_file_mods'             => false,
 
-		// Force SSL on the admin area. Sets FORCE_SSL_ADMIN constant.
+		// Admin SSL is not enforced by this plugin: the FORCE_SSL_ADMIN constant
+		// must be set before plugins load to take effect. Define FORCE_SSL_ADMIN
+		// in wp-config.php or use an HTTPS siteurl instead. Kept for reference.
 		'force_ssl_admin'               => false,
 
 		// Prevent changes to the site tagline (Settings → General → Tagline).

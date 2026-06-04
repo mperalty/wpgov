@@ -9,11 +9,11 @@
     allConstantsGlobal="true"
 >
     <projectFiles>
-        <directory name="wp-governance" />
-        <file name="wp-governance.php" />
+        <directory name="governance-guardrails" />
+        <file name="governance-guardrails.php" />
         <ignoreFiles>
             <directory name="vendor" />
-            <file name="wp-governance/wp-governance-config.php" />
+            <file name="governance-guardrails/governance-guardrails-config.php" />
         </ignoreFiles>
     </projectFiles>
 

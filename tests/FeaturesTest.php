@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Features module.
@@ -307,13 +307,13 @@ class FeaturesTest extends WP_UnitTestCase {
             $config['features'] = array_merge( $config['features'] ?? [], $features );
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-features.php';
-        new \WP_Governance\Modules\Features( Config::section( 'features' ), Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-features.php';
+        new \GovGuard\Modules\Features( Config::section( 'features' ), Config::get() );
     }
 
     /**

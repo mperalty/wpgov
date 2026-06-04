@@ -33,14 +33,14 @@ If you've managed Drupal sites, most of Governance Guardrails will feel familiar
 
 | Drupal concept | Governance Guardrails equivalent |
 |---|---|
-| `core.extension.yml` / config sync directory | `wp-governance-config.php` — one file that declares the full policy |
+| `core.extension.yml` / config sync directory | `governance-guardrails-config.php` — one file that declares the full policy |
 | `$config` overrides in `settings.php` | The entire approach — config lives in a PHP file, not the database |
-| `drush config:export` | `wp governance export` |
+| `drush config:export` | `wp govguard export` |
 | `drush config:import` | Not needed — deploy the file and the policy is live on the next page load |
-| Config Split (per-environment config) | Environment overrides — `wp-governance-config.local.php`, `.staging.php`, `.production.php` merged on top of the base, keyed to `WP_ENVIRONMENT_TYPE` |
+| Config Split (per-environment config) | Environment overrides — `governance-guardrails-config.local.php`, `.staging.php`, `.production.php` merged on top of the base, keyed to `WP_ENVIRONMENT_TYPE` |
 | Permissions page (`admin/people/permissions`) | `deny_capabilities` — same role/capability matrix, defined in config |
 | SecKit module | `security.headers` + `security` toggles (pingback, author enumeration, etc.) |
-| Security Review / `drush security:check` | `wp governance audit` — opinionated checklist of ungoverned items |
+| Security Review / `drush security:check` | `wp govguard audit` — opinionated checklist of ungoverned items |
 | `system.date` / `system.site` config objects | `locked_options` — pin any `wp_options` value (date format, timezone, site name, etc.) from the config file |
 
 The mental model is the same: define your site's policy in code, commit it, and deploy it across environments. The difference is that WordPress doesn't have a native config management layer, so Governance Guardrails fills that gap for the operational and security settings that matter most. There's no export/import cycle — the PHP file _is_ the active config, read on every request.
@@ -52,8 +52,8 @@ The mental model is the same: define your site's policy in code, commit it, and 
 
 ## Structure
 
-- `wp-governance.php` is the plugin loader (works as a normal plugin or mu-plugin).
-- `wp-governance/` contains the governance modules and sample config.
+- `governance-guardrails.php` is the plugin loader (works as a normal plugin or mu-plugin).
+- `governance-guardrails/` contains the governance modules and sample config.
 - `tests/` contains the PHPUnit suite and bootstrap.
 
 ## Installation
@@ -64,23 +64,23 @@ Upload the plugin files to `/wp-content/plugins/governance-guardrails/` or insta
 
 ### Must-use plugin
 
-Copy `wp-governance.php` and the `wp-governance/` directory into `wp-content/mu-plugins/`.
+Copy `governance-guardrails.php` and the `governance-guardrails/` directory into `wp-content/mu-plugins/`.
 
 By default the plugin loads its config from:
 
 ```php
-wp-content/mu-plugins/wp-governance/wp-governance-config.php
+wp-content/mu-plugins/governance-guardrails/governance-guardrails-config.php
 ```
 
 Override the path in `wp-config.php` if needed:
 
 ```php
-define( 'WP_GOVERNANCE_CONFIG', '/absolute/path/to/wp-governance-config.php' );
+define( 'GOVGUARD_CONFIG', '/absolute/path/to/governance-guardrails-config.php' );
 ```
 
-The shipped sample config lives at `wp-governance/wp-governance-config.php`.
+The shipped sample config lives at `governance-guardrails/governance-guardrails-config.php`.
 
-Config loading is fail-safe — if the config file has a syntax error, is missing, or doesn't return an array, the plugin fails open (no governance rules are enforced) and logs a warning. Your site will never crash from a bad config file. Run `wp governance check` to validate.
+Config loading is fail-safe — if the config file has a syntax error, is missing, or doesn't return an array, the plugin fails open (no governance rules are enforced) and logs a warning. Your site will never crash from a bad config file. Run `wp govguard check` to validate.
 
 ## Governance Scope
 
@@ -106,19 +106,19 @@ This means an administrator can still upload any file type and see all dashboard
 
 Governance Guardrails automatically deep-merges an environment-specific override file on top of the base config. The environment is read from the `WP_ENVIRONMENT_TYPE` constant (set it in `wp-config.php`).
 
-Create a file alongside your base config named `wp-governance-config.{environment}.php`:
+Create a file alongside your base config named `governance-guardrails-config.{environment}.php`:
 
 ```
-wp-governance-config.php              ← base (shared across all environments)
-wp-governance-config.local.php        ← overrides for local development
-wp-governance-config.staging.php      ← overrides for staging
-wp-governance-config.production.php   ← overrides for production
+governance-guardrails-config.php              ← base (shared across all environments)
+governance-guardrails-config.local.php        ← overrides for local development
+governance-guardrails-config.staging.php      ← overrides for staging
+governance-guardrails-config.production.php   ← overrides for production
 ```
 
 Only include the keys you want to change — everything else inherits from the base:
 
 ```php
-// wp-governance-config.local.php — loosen restrictions for local dev
+// governance-guardrails-config.local.php — loosen restrictions for local dev
 return array(
     'features' => array(
         'disable_xmlrpc'      => false,   // re-enable for local testing
@@ -130,7 +130,7 @@ return array(
 );
 ```
 
-Associative arrays (like `features`, `security.headers`) are merged recursively — override keys win, base keys are preserved. Lists (like `restricted_menu_slugs`) are replaced entirely. `wp governance status` shows which environment and override file are active.
+Associative arrays (like `features`, `security.headers`) are merged recursively — override keys win, base keys are preserved. Lists (like `restricted_menu_slugs`) are replaced entirely. `wp govguard status` shows which environment and override file are active.
 
 ## Policy Recipes
 
@@ -187,9 +187,9 @@ return array(
 The plugin exposes a small extension surface for site-specific governance:
 
 - `custom_rules` can be plain callables or structured rules with `callback`, `hook`, `priority`, `admin_only`, and `front_only`.
-- `wp_governance_before_enforce` fires before modules are instantiated.
-- `wp_governance_loaded` fires after modules are loaded and passes the config plus instantiated modules.
-- `wp_governance_deny_caps` lets you adjust denied capabilities per role at runtime.
+- `govguard_before_enforce` fires before modules are instantiated.
+- `govguard_loaded` fires after modules are loaded and passes the config plus instantiated modules.
+- `govguard_deny_caps` lets you adjust denied capabilities per role at runtime.
 
 Example structured custom rule:
 
@@ -211,7 +211,7 @@ Example structured custom rule:
 Example capability filter:
 
 ```php
-add_filter( 'wp_governance_deny_caps', function ( array $caps, string $role ): array {
+add_filter( 'govguard_deny_caps', function ( array $caps, string $role ): array {
     if ( $role === 'editor' ) {
         $caps[] = 'edit_theme_options';
     }
@@ -236,20 +236,20 @@ composer test:all
 
 ## WP-CLI
 
-When WP-CLI is available, the plugin registers the `wp governance` command set.
+When WP-CLI is available, the plugin registers the `wp govguard` command set.
 
 Examples:
 
 ```bash
-wp governance status
-wp governance check
-wp governance audit
-wp governance audit --severity=high
-wp governance diff
-wp governance get features --format=json
-wp governance mimes
+wp govguard status
+wp govguard check
+wp govguard audit
+wp govguard audit --severity=high
+wp govguard diff
+wp govguard get features --format=json
+wp govguard mimes
 ```
 
-`wp governance audit` scans the site against an opinionated checklist and reports everything that isn't locked down — ungoverned features, missing security headers, open upload types, default admin bar nodes, and more. Use `--severity=high` to focus on the most critical findings.
+`wp govguard audit` scans the site against an opinionated checklist and reports everything that isn't locked down — ungoverned features, missing security headers, open upload types, default admin bar nodes, and more. Use `--severity=high` to focus on the most critical findings.
 
-`wp governance diff` compares the active config against the shipped sample defaults, not the fail-open runtime schema.
+`wp govguard diff` compares the active config against the shipped sample defaults, not the fail-open runtime schema.

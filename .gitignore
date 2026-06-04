@@ -5,7 +5,7 @@ vendor/
 wp/
 
 # Build artifacts
-wp-governance-*.zip
+governance-guardrails-*.zip
 
 # PHPUnit
 .phpunit.result.cache
