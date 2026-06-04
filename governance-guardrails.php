@@ -31,5 +31,5 @@ GovGuard\Governance::instance();
 // Register WP-CLI commands.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once GOVGUARD_DIR . 'class-cli.php';
-	WP_CLI::add_command( 'govguard', GovGuard\CLI::class );
+	WP_CLI::add_command( 'governance', GovGuard\CLI::class );
 }
