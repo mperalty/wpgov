@@ -71,9 +71,9 @@ if ( ! class_exists( Formatter::class, false ) ) {
 
 namespace {
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
-require_once WP_GOVERNANCE_DIR . 'class-cli.php';
+require_once GOVGUARD_DIR . 'class-cli.php';
 
 /**
  * Tests for the WP-CLI surface.
@@ -115,23 +115,23 @@ class CLITest extends WP_UnitTestCase {
 		$callback = static function () use ( $path ): string {
 			return $path;
 		};
-		add_filter( 'wp_governance_config_path', $callback, 1 );
-		$this->filters_to_remove[] = [ 'wp_governance_config_path', $callback, 1 ];
+		add_filter( 'govguard_config_path', $callback, 1 );
+		$this->filters_to_remove[] = [ 'govguard_config_path', $callback, 1 ];
 	}
 
 	private function set_environment_config_path( string $path ): void {
 		$callback = static function () use ( $path ): string {
 			return $path;
 		};
-		add_filter( 'wp_governance_environment_config_path', $callback, 1 );
-		$this->filters_to_remove[] = [ 'wp_governance_environment_config_path', $callback, 1 ];
+		add_filter( 'govguard_environment_config_path', $callback, 1 );
+		$this->filters_to_remove[] = [ 'govguard_environment_config_path', $callback, 1 ];
 	}
 
 	public function test_diff_uses_sample_defaults_as_the_clean_baseline(): void {
-		$this->set_config_path( WP_GOVERNANCE_DIR . 'wp-governance-config.php' );
+		$this->set_config_path( GOVGUARD_DIR . 'governance-guardrails-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->diff( [], [] );
 
 		$this->assertContains(
@@ -145,7 +145,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/invalid-nested-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->check( [], [] );
 
 		$warnings = implode( "\n", \WP_CLI::$warnings );
@@ -162,7 +162,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->status( [], [] );
 
 		$this->assertNotEmpty( \WP_CLI\Formatter::$display_calls );
@@ -182,7 +182,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->status( [], [] );
 
 		$rows    = \WP_CLI\Formatter::$display_calls[0];
@@ -197,7 +197,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/empty-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->status( [], [] );
 
 		$rows = \WP_CLI\Formatter::$display_calls[0];
@@ -213,7 +213,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->features( [], [] );
 
 		$rows = \WP_CLI\Formatter::$display_calls[0];
@@ -227,7 +227,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->features( [], [ 'status' => 'enforced' ] );
 
 		$rows = \WP_CLI\Formatter::$display_calls[0];
@@ -241,7 +241,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->features( [], [ 'status' => 'off' ] );
 
 		$rows = \WP_CLI\Formatter::$display_calls[0];
@@ -255,7 +255,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/empty-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->features( [], [] );
 
 		$this->assertContains( 'No features configured.', \WP_CLI::$logs );
@@ -268,7 +268,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->caps( [], [] );
 
 		$rows = \WP_CLI\Formatter::$display_calls[0];
@@ -283,7 +283,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->caps( [], [ 'role' => 'editor' ] );
 
 		$rows = \WP_CLI\Formatter::$display_calls[0];
@@ -297,7 +297,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/empty-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->caps( [], [] );
 
 		$this->assertContains( 'No capability denials configured.', \WP_CLI::$logs );
@@ -309,7 +309,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->menus( [], [] );
 
 		$rows  = \WP_CLI\Formatter::$display_calls[0];
@@ -323,7 +323,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/empty-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->menus( [], [] );
 
 		$this->assertContains( 'No menu restrictions configured.', \WP_CLI::$logs );
@@ -335,7 +335,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->mimes( [], [] );
 
 		$rows = \WP_CLI\Formatter::$display_calls[0];
@@ -349,7 +349,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/empty-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->mimes( [], [] );
 
 		$this->assertContains( 'No MIME type restrictions configured (using WordPress defaults).', \WP_CLI::$logs );
@@ -361,7 +361,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->get( [ 'features' ], [ 'format' => 'json' ] );
 
 		$this->assertNotEmpty( \WP_CLI::$printed_values );
@@ -377,7 +377,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->expectException( \RuntimeException::class );
 		$this->expectExceptionMessage( 'Unknown config section: nonexistent' );
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->get( [ 'nonexistent' ], [] );
 	}
 
@@ -387,7 +387,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->export( [], [] );
 
 		$json = implode( '', \WP_CLI::$logs );
@@ -402,7 +402,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->export( [], [ 'pretty' => true ] );
 
 		$json = implode( '', \WP_CLI::$logs );
@@ -415,7 +415,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->set_config_path( __DIR__ . '/fixtures/valid-config.php' );
 		Config::reset();
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->check( [], [] );
 
 		$successes = implode( "\n", \WP_CLI::$successes );
@@ -430,7 +430,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->expectException( \RuntimeException::class );
 		$this->expectExceptionMessage( 'Config file not found.' );
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->check( [], [] );
 	}
 
@@ -441,7 +441,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->expectException( \RuntimeException::class );
 		$this->expectExceptionMessage( 'Config file does not return a PHP array.' );
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->check( [], [] );
 	}
 
@@ -452,7 +452,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->expectException( \RuntimeException::class );
 		$this->expectExceptionMessage( 'Config file could not be loaded.' );
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->check( [], [] );
 	}
 
@@ -464,7 +464,7 @@ class CLITest extends WP_UnitTestCase {
 		$this->expectException( \RuntimeException::class );
 		$this->expectExceptionMessage( 'Environment override could not be loaded.' );
 
-		$cli = new \WP_Governance\CLI();
+		$cli = new \GovGuard\CLI();
 		$cli->check( [], [] );
 	}
 }

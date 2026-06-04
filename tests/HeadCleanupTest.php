@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Head Cleanup module.
@@ -85,7 +85,7 @@ class HeadCleanupTest extends WP_UnitTestCase {
     }
 
     private function load_module(array $settings): void {
-        require_once WP_GOVERNANCE_DIR . 'modules/class-head-cleanup.php';
-        new \WP_Governance\Modules\Head_Cleanup($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-head-cleanup.php';
+        new \GovGuard\Modules\Head_Cleanup($settings, Config::get());
     }
 }

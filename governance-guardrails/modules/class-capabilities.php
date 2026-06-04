@@ -1,8 +1,8 @@
 <?php
 
-namespace WP_Governance\Modules;
+namespace GovGuard\Modules;
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -70,7 +70,7 @@ class Capabilities {
 			 */
 			$lookup = array();
 
-			foreach ( (array) apply_filters( 'wp_governance_deny_caps', $denied, $role ) as $cap ) {
+			foreach ( (array) apply_filters( 'govguard_deny_caps', $denied, $role ) as $cap ) {
 				$cap = sanitize_key( (string) $cap );
 				if ( '' !== $cap ) {
 					$lookup[ $cap ] = true;

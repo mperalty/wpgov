@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Admin Menu module.
@@ -32,8 +32,8 @@ class AdminMenuTest extends WP_UnitTestCase {
     public function test_registers_hooks(): void {
         $slugs = [ 'tools.php' ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-admin-menu.php';
-        $module = new \WP_Governance\Modules\Admin_Menu( $slugs, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-admin-menu.php';
+        $module = new \GovGuard\Modules\Admin_Menu( $slugs, Config::get() );
 
         $this->assertNotFalse( has_action( 'admin_menu', [ $module, 'remove_menus' ] ) );
         $this->assertNotFalse( has_action( 'admin_init', [ $module, 'block_direct_access' ] ) );
@@ -42,25 +42,25 @@ class AdminMenuTest extends WP_UnitTestCase {
     public function test_menu_hook_at_late_priority(): void {
         $slugs = [ 'tools.php' ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-admin-menu.php';
-        $module = new \WP_Governance\Modules\Admin_Menu( $slugs, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-admin-menu.php';
+        $module = new \GovGuard\Modules\Admin_Menu( $slugs, Config::get() );
 
         $priority = has_action( 'admin_menu', [ $module, 'remove_menus' ] );
         $this->assertSame( 999, $priority );
     }
 
-    public function test_wp_governance_restrict_menu_filter(): void {
+    public function test_govguard_restrict_menu_filter(): void {
         $slugs = [ 'tools.php' ];
 
         $callback = static function ( array $slugs ): array {
             $slugs[] = 'options-general.php';
             return $slugs;
         };
-        add_filter( 'wp_governance_restrict_menu', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_restrict_menu', $callback, 10 ];
+        add_filter( 'govguard_restrict_menu', $callback );
+        $this->filters_to_remove[] = [ 'govguard_restrict_menu', $callback, 10 ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-admin-menu.php';
-        $module = new \WP_Governance\Modules\Admin_Menu( $slugs, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-admin-menu.php';
+        $module = new \GovGuard\Modules\Admin_Menu( $slugs, Config::get() );
 
         // The filter should have been applied during construction.
         // We verify by checking the hook is registered (the internal slug list is private,
@@ -71,8 +71,8 @@ class AdminMenuTest extends WP_UnitTestCase {
     public function test_unrestricted_user_bypasses_menu_removal(): void {
         $slugs = [ 'tools.php' ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-admin-menu.php';
-        $module = new \WP_Governance\Modules\Admin_Menu( $slugs, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-admin-menu.php';
+        $module = new \GovGuard\Modules\Admin_Menu( $slugs, Config::get() );
 
         // Set up as admin (unrestricted).
         $admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );

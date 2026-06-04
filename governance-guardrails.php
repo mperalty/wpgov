@@ -12,24 +12,24 @@
  * Domain Path: /languages
  *
  * This plugin can be activated as a normal plugin or installed as a must-use
- * plugin by dropping this file and the wp-governance/ directory into
+ * plugin by dropping this file and the governance-guardrails/ directory into
  * wp-content/mu-plugins/.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WP_GOVERNANCE_VERSION', '1.0.0' );
-define( 'WP_GOVERNANCE_DIR', __DIR__ . '/wp-governance/' );
+define( 'GOVGUARD_VERSION', '1.0.0' );
+define( 'GOVGUARD_DIR', __DIR__ . '/governance-guardrails/' );
 
 // Load core classes.
-require_once WP_GOVERNANCE_DIR . 'class-config.php';
-require_once WP_GOVERNANCE_DIR . 'class-governance.php';
+require_once GOVGUARD_DIR . 'class-config.php';
+require_once GOVGUARD_DIR . 'class-governance.php';
 
 // Boot.
-WP_Governance\Governance::instance();
+GovGuard\Governance::instance();
 
 // Register WP-CLI commands.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	require_once WP_GOVERNANCE_DIR . 'class-cli.php';
-	WP_CLI::add_command( 'governance', WP_Governance\CLI::class );
+	require_once GOVGUARD_DIR . 'class-cli.php';
+	WP_CLI::add_command( 'govguard', GovGuard\CLI::class );
 }

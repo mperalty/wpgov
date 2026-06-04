@@ -1,8 +1,8 @@
 <?php
 
-namespace WP_Governance\Modules;
+namespace GovGuard\Modules;
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -136,12 +136,6 @@ class Features {
 			$this->disable_file_mods();
 		}
 
-		if ( $this->on( 'force_ssl_admin' ) ) {
-			if ( ! defined( 'FORCE_SSL_ADMIN' ) ) {
-				define( 'FORCE_SSL_ADMIN', true );
-			}
-		}
-
 		if ( $this->on( 'disable_tagline_editing' ) ) {
 			add_filter(
 				'pre_update_option_blogdescription',
@@ -215,7 +209,7 @@ class Features {
 	private function on( string $key ): bool {
 		$enabled = ! empty( $this->features[ $key ] );
 
-		return (bool) apply_filters( 'wp_governance_feature_enabled', $enabled, $key );
+		return (bool) apply_filters( 'govguard_feature_enabled', $enabled, $key );
 	}
 
 	/**

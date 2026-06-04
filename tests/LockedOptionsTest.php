@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Locked_Options module.
@@ -117,7 +117,7 @@ class LockedOptionsTest extends WP_UnitTestCase {
     // ── Helper ──────────────────────────────────────────────────
 
     private function load_module( array $options ): void {
-        require_once WP_GOVERNANCE_DIR . 'modules/class-locked-options.php';
-        new \WP_Governance\Modules\Locked_Options( $options, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-locked-options.php';
+        new \GovGuard\Modules\Locked_Options( $options, Config::get() );
     }
 }

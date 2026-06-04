@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Security module.
@@ -31,8 +31,8 @@ class SecurityTest extends WP_UnitTestCase {
     public function test_version_query_strings_stripped(): void {
         $settings = ['hide_wp_version_from_scripts' => true];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        new \GovGuard\Modules\Security($settings, Config::get());
 
         $url    = 'https://example.com/wp-includes/js/jquery.js?ver=' . get_bloginfo( 'version' );
         $result = apply_filters('script_loader_src', $url);
@@ -44,8 +44,8 @@ class SecurityTest extends WP_UnitTestCase {
     public function test_version_query_strings_preserved_when_off(): void {
         $settings = ['hide_wp_version_from_scripts' => false];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        new \GovGuard\Modules\Security($settings, Config::get());
 
         $url    = 'https://example.com/wp-includes/js/jquery.js?ver=1.2.3';
         $result = apply_filters('script_loader_src', $url);
@@ -56,8 +56,8 @@ class SecurityTest extends WP_UnitTestCase {
     public function test_non_core_asset_versions_are_preserved(): void {
         $settings = ['hide_wp_version_from_scripts' => true];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        new \GovGuard\Modules\Security($settings, Config::get());
 
         $url    = 'https://example.com/wp-content/plugins/example/app.js?ver=2026.03.27';
         $result = apply_filters('script_loader_src', $url);
@@ -68,8 +68,8 @@ class SecurityTest extends WP_UnitTestCase {
     public function test_pingback_header_removed(): void {
         $settings = ['remove_pingback_header' => true];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        new \GovGuard\Modules\Security($settings, Config::get());
 
         $headers = apply_filters('wp_headers', [
             'X-Pingback' => 'https://example.com/xmlrpc.php',
@@ -88,8 +88,8 @@ class SecurityTest extends WP_UnitTestCase {
             ],
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        new \GovGuard\Modules\Security($settings, Config::get());
 
         $headers = apply_filters('wp_headers', []);
 
@@ -105,8 +105,8 @@ class SecurityTest extends WP_UnitTestCase {
             ],
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        new \GovGuard\Modules\Security($settings, Config::get());
 
         $headers = apply_filters('wp_headers', []);
 
@@ -117,8 +117,8 @@ class SecurityTest extends WP_UnitTestCase {
     public function test_author_archives_blocked_for_unauthenticated(): void {
         $settings = ['disable_author_archives' => true];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        new \GovGuard\Modules\Security($settings, Config::get());
 
         // The module filters REST endpoints for unauthenticated users.
         wp_set_current_user(0);
@@ -137,8 +137,8 @@ class SecurityTest extends WP_UnitTestCase {
     public function test_user_endpoints_preserved_for_authenticated(): void {
         $settings = ['disable_author_archives' => true];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        new \GovGuard\Modules\Security($settings, Config::get());
 
         $user_id = self::factory()->user->create(['role' => 'administrator']);
         wp_set_current_user($user_id);
@@ -158,8 +158,8 @@ class SecurityTest extends WP_UnitTestCase {
             'remove_pingback_header'  => true,
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        $module = new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        $module = new \GovGuard\Modules\Security($settings, Config::get());
 
         // Only one wp_headers callback should be registered.
         $this->assertNotFalse(has_filter('wp_headers', [$module, 'filter_headers']));
@@ -180,8 +180,8 @@ class SecurityTest extends WP_UnitTestCase {
             ],
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        $module = new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        $module = new \GovGuard\Modules\Security($settings, Config::get());
 
         $this->assertNotFalse(has_action('admin_init', [$module, 'send_direct_headers']));
         $this->assertNotFalse(has_action('login_init', [$module, 'send_direct_headers']));
@@ -197,8 +197,8 @@ class SecurityTest extends WP_UnitTestCase {
             'remove_pingback_header' => true,
         ];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        $module = new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        $module = new \GovGuard\Modules\Security($settings, Config::get());
 
         $response = new WP_HTTP_Response(null, 200, [
             'X-Pingback' => 'https://example.com/xmlrpc.php',
@@ -215,8 +215,8 @@ class SecurityTest extends WP_UnitTestCase {
     public function test_no_header_filter_when_no_header_settings(): void {
         $settings = ['disable_author_archives' => true];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-security.php';
-        $module = new \WP_Governance\Modules\Security($settings, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-security.php';
+        $module = new \GovGuard\Modules\Security($settings, Config::get());
 
         $this->assertFalse(has_filter('wp_headers', [$module, 'filter_headers']));
     }

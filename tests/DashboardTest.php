@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Dashboard module.
@@ -24,8 +24,8 @@ class DashboardTest extends WP_UnitTestCase {
     public function test_registers_removal_hook(): void {
         $widgets = ['dashboard_quick_press', 'dashboard_primary'];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-dashboard.php';
-        $module = new \WP_Governance\Modules\Dashboard($widgets, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-dashboard.php';
+        $module = new \GovGuard\Modules\Dashboard($widgets, Config::get());
 
         $this->assertNotFalse(
             has_action('wp_dashboard_setup', [$module, 'remove_widgets'])
@@ -35,8 +35,8 @@ class DashboardTest extends WP_UnitTestCase {
     public function test_hook_registered_at_late_priority(): void {
         $widgets = ['dashboard_quick_press'];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-dashboard.php';
-        $module = new \WP_Governance\Modules\Dashboard($widgets, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-dashboard.php';
+        $module = new \GovGuard\Modules\Dashboard($widgets, Config::get());
 
         $priority = has_action('wp_dashboard_setup', [$module, 'remove_widgets']);
         $this->assertSame(999, $priority);
@@ -50,8 +50,8 @@ class DashboardTest extends WP_UnitTestCase {
 
         $wp_meta_boxes['dashboard']['side']['core']['dashboard_quick_press'] = ['id' => 'dashboard_quick_press'];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-dashboard.php';
-        $module = new \WP_Governance\Modules\Dashboard(['dashboard_quick_press'], Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-dashboard.php';
+        $module = new \GovGuard\Modules\Dashboard(['dashboard_quick_press'], Config::get());
         $module->remove_widgets();
 
         $this->assertArrayHasKey('dashboard_quick_press', $wp_meta_boxes['dashboard']['side']['core']);

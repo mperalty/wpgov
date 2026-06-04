@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Admin Bar module.
@@ -27,8 +27,8 @@ class AdminBarTest extends WP_UnitTestCase {
     public function test_registers_removal_hook(): void {
         $nodes = ['wp-logo', 'comments'];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-admin-bar.php';
-        $module = new \WP_Governance\Modules\Admin_Bar($nodes, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-admin-bar.php';
+        $module = new \GovGuard\Modules\Admin_Bar($nodes, Config::get());
 
         $this->assertNotFalse(
             has_action('wp_before_admin_bar_render', [$module, 'remove_nodes'])
@@ -49,8 +49,8 @@ class AdminBarTest extends WP_UnitTestCase {
 
         $nodes = ['wp-logo', 'comments'];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-admin-bar.php';
-        $module = new \WP_Governance\Modules\Admin_Bar($nodes, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-admin-bar.php';
+        $module = new \GovGuard\Modules\Admin_Bar($nodes, Config::get());
         $module->remove_nodes();
 
         $this->assertNull($wp_admin_bar->get_node('wp-logo'));
@@ -71,8 +71,8 @@ class AdminBarTest extends WP_UnitTestCase {
         $wp_admin_bar->add_node(['id' => 'wp-logo', 'title' => 'WP']);
         $wp_admin_bar->add_node(['id' => 'comments', 'title' => 'Comments']);
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-admin-bar.php';
-        $module = new \WP_Governance\Modules\Admin_Bar(['wp-logo', 'comments'], Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-admin-bar.php';
+        $module = new \GovGuard\Modules\Admin_Bar(['wp-logo', 'comments'], Config::get());
         $module->remove_nodes();
 
         $this->assertNotNull($wp_admin_bar->get_node('wp-logo'));

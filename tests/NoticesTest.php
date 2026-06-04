@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Notices module.
@@ -27,8 +27,8 @@ class NoticesTest extends WP_UnitTestCase {
     public function test_update_nag_removal_registered(): void {
         $notices = ['update_nag'];
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-notices.php';
-        new \WP_Governance\Modules\Notices($notices, Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-notices.php';
+        new \GovGuard\Modules\Notices($notices, Config::get());
 
         // The module registers an admin_init action to remove the nag.
         $this->assertNotFalse(has_action('admin_init'));
@@ -37,8 +37,8 @@ class NoticesTest extends WP_UnitTestCase {
     public function test_empty_notices_registers_nothing_extra(): void {
         $before = has_action('admin_init');
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-notices.php';
-        new \WP_Governance\Modules\Notices([], Config::get());
+        require_once GOVGUARD_DIR . 'modules/class-notices.php';
+        new \GovGuard\Modules\Notices([], Config::get());
 
         // No new hooks should be added for an empty list.
         $this->assertSame($before, has_action('admin_init'));
@@ -48,8 +48,8 @@ class NoticesTest extends WP_UnitTestCase {
         $callback = static function (): void {};
         add_action( 'admin_notices', $callback );
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-notices.php';
-        $module = new \WP_Governance\Modules\Notices( [ $callback ], Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-notices.php';
+        $module = new \GovGuard\Modules\Notices( [ $callback ], Config::get() );
         $module->suppress_notices();
 
         $this->assertFalse( has_action( 'admin_notices', $callback ) );
@@ -62,8 +62,8 @@ class NoticesTest extends WP_UnitTestCase {
         $callback = static function (): void {};
         add_action( 'admin_notices', $callback );
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-notices.php';
-        $module = new \WP_Governance\Modules\Notices( [ $callback ], Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-notices.php';
+        $module = new \GovGuard\Modules\Notices( [ $callback ], Config::get() );
         $module->suppress_notices();
 
         $this->assertNotFalse( has_action( 'admin_notices', $callback ) );

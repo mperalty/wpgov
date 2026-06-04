@@ -33,31 +33,31 @@ This plugin does not claim to secure a site by itself. It is intended as a gover
 
 = Must-use plugin support =
 
-Governance Guardrails was originally built for must-use plugin deployment. It can still be installed that way by copying `wp-governance.php` and the `wp-governance/` directory into `wp-content/mu-plugins/`.
+Governance Guardrails was originally built for must-use plugin deployment. It can still be installed that way by copying `governance-guardrails.php` and the `governance-guardrails/` directory into `wp-content/mu-plugins/`.
 
 For WordPress.org installation, it can also be installed and activated as a normal plugin. In that case, the included sample config is used from the plugin directory unless you define a custom config path.
 
 To use a custom config file, add this to `wp-config.php`:
 
-`define( 'WP_GOVERNANCE_CONFIG', '/absolute/path/to/wp-governance-config.php' );`
+`define( 'GOVGUARD_CONFIG', '/absolute/path/to/governance-guardrails-config.php' );`
 
-The shipped sample config lives at `wp-governance/wp-governance-config.php`.
+The shipped sample config lives at `governance-guardrails/governance-guardrails-config.php`.
 
 Config loading is fail-open. If the config file is missing, unreadable, has a syntax error, or does not return an array, Governance Guardrails does not enforce governance rules and logs a warning instead of crashing the site.
 
 = WP-CLI =
 
-When WP-CLI is available, Governance Guardrails registers the `wp governance` command set.
+When WP-CLI is available, Governance Guardrails registers the `wp govguard` command set.
 
 Examples:
 
-* `wp governance status`
-* `wp governance check`
-* `wp governance audit`
-* `wp governance audit --severity=high`
-* `wp governance diff`
-* `wp governance get features --format=json`
-* `wp governance mimes`
+* `wp govguard status`
+* `wp govguard check`
+* `wp govguard audit`
+* `wp govguard audit --severity=high`
+* `wp govguard diff`
+* `wp govguard get features --format=json`
+* `wp govguard mimes`
 
 == Installation ==
 
@@ -65,16 +65,16 @@ Examples:
 
 1. Upload the plugin files to the `/wp-content/plugins/governance-guardrails/` directory, or install the plugin through the WordPress Plugins screen.
 2. Activate Governance Guardrails through the Plugins screen in WordPress.
-3. Review the included sample config at `wp-governance/wp-governance-config.php`.
-4. For a site-specific policy, define `WP_GOVERNANCE_CONFIG` in `wp-config.php` and point it at your own config file.
-5. If WP-CLI is available, run `wp governance check` to validate the active config.
+3. Review the included sample config at `governance-guardrails/governance-guardrails-config.php`.
+4. For a site-specific policy, define `GOVGUARD_CONFIG` in `wp-config.php` and point it at your own config file.
+5. If WP-CLI is available, run `wp govguard check` to validate the active config.
 
 = Must-use plugin installation =
 
-1. Copy `wp-governance.php` and the `wp-governance/` directory into `wp-content/mu-plugins/`.
-2. Review or replace the config file at `wp-content/mu-plugins/wp-governance/wp-governance-config.php`.
-3. Optionally define `WP_GOVERNANCE_CONFIG` in `wp-config.php` to point at a config file outside the plugin directory.
-4. If WP-CLI is available, run `wp governance status` or `wp governance check`.
+1. Copy `governance-guardrails.php` and the `governance-guardrails/` directory into `wp-content/mu-plugins/`.
+2. Review or replace the config file at `wp-content/mu-plugins/governance-guardrails/governance-guardrails-config.php`.
+3. Optionally define `GOVGUARD_CONFIG` in `wp-config.php` to point at a config file outside the plugin directory.
+4. If WP-CLI is available, run `wp govguard status` or `wp govguard check`.
 
 == Frequently Asked Questions ==
 
@@ -88,7 +88,7 @@ Yes. Governance Guardrails can be activated as a normal plugin. It was originall
 
 = Where does the configuration live? =
 
-By default, the plugin loads `wp-governance/wp-governance-config.php` from the plugin directory. You can define `WP_GOVERNANCE_CONFIG` in `wp-config.php` to use an absolute path to another config file.
+By default, the plugin loads `governance-guardrails/governance-guardrails-config.php` from the plugin directory. You can define `GOVGUARD_CONFIG` in `wp-config.php` to use an absolute path to another config file.
 
 = What happens if the config file is broken? =
 

@@ -2,11 +2,11 @@
 <ruleset name="Governance Guardrails Focused Checks">
 	<description>Focused WPCS rules for production-risk checks in Governance Guardrails runtime code.</description>
 
-	<file>wp-governance.php</file>
-	<file>wp-governance</file>
+	<file>governance-guardrails.php</file>
+	<file>governance-guardrails</file>
 
-	<exclude-pattern>*/wp-governance/wp-governance-config.php</exclude-pattern>
-	<exclude-pattern>*/wp-governance/class-cli.php</exclude-pattern>
+	<exclude-pattern>*/governance-guardrails/governance-guardrails-config.php</exclude-pattern>
+	<exclude-pattern>*/governance-guardrails/class-cli.php</exclude-pattern>
 
 	<arg name="extensions" value="php" />
 	<arg value="sp" />

@@ -1,6 +1,6 @@
 <?php
 
-namespace WP_Governance;
+namespace GovGuard;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -69,7 +69,7 @@ class Governance {
 	 * @phpstan-param array<string, mixed> $config The full governance config.
 	 * @psalm-param array $config The full governance config.
 		 */
-		do_action( 'wp_governance_before_enforce', $config );
+		do_action( 'govguard_before_enforce', $config );
 
 		// Upload rules span two top-level config sections, so they are booted
 		// outside MODULE_MAP instead of pretending one section owns them all.
@@ -85,7 +85,7 @@ class Governance {
 
 			$fqcn = __NAMESPACE__ . '\\Modules\\' . $class;
 
-			require_once WP_GOVERNANCE_DIR . 'modules/' . $file;
+			require_once GOVGUARD_DIR . 'modules/' . $file;
 			$this->modules[ $key ] = new $fqcn( $section, $config );
 		}
 
@@ -94,7 +94,7 @@ class Governance {
 
 		// Status page (always loaded for unrestricted users).
 		if ( is_admin() ) {
-			require_once WP_GOVERNANCE_DIR . 'class-status-page.php';
+			require_once GOVGUARD_DIR . 'class-status-page.php';
 			new Status_Page( $config );
 		}
 
@@ -106,7 +106,7 @@ class Governance {
 	 * @phpstan-param array<string, object> $modules Instantiated module objects keyed by config section.
 	 * @psalm-param array $modules Instantiated module objects keyed by config section.
 		 */
-		do_action( 'wp_governance_loaded', $config, $this->modules );
+		do_action( 'govguard_loaded', $config, $this->modules );
 	}
 
 	/**
@@ -125,7 +125,7 @@ class Governance {
 			return;
 		}
 
-		require_once WP_GOVERNANCE_DIR . 'modules/class-uploads.php';
+		require_once GOVGUARD_DIR . 'modules/class-uploads.php';
 		$this->modules['uploads'] = new Modules\Uploads( $allowed, $config );
 	}
 

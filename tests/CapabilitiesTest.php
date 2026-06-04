@@ -1,6 +1,6 @@
 <?php
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 /**
  * Tests for the Capabilities module.
@@ -108,7 +108,7 @@ class CapabilitiesTest extends WP_UnitTestCase {
         $this->assertFalse( current_user_can( 'upload_files' ) );
     }
 
-    public function test_wp_governance_deny_caps_filter(): void {
+    public function test_govguard_deny_caps_filter(): void {
         $deny_map = [
             'editor' => [ 'install_plugins' ],
         ];
@@ -122,8 +122,8 @@ class CapabilitiesTest extends WP_UnitTestCase {
             }
             return $denied;
         };
-        add_filter( 'wp_governance_deny_caps', $callback, 10, 2 );
-        $this->filters_to_remove[] = [ 'wp_governance_deny_caps', $callback, 10 ];
+        add_filter( 'govguard_deny_caps', $callback, 10, 2 );
+        $this->filters_to_remove[] = [ 'govguard_deny_caps', $callback, 10 ];
 
         $user_id = self::factory()->user->create( [ 'role' => 'editor' ] );
         wp_set_current_user( $user_id );
@@ -156,12 +156,12 @@ class CapabilitiesTest extends WP_UnitTestCase {
             $config['unrestricted_role']  = $unrestricted_role;
             return $config;
         };
-        add_filter( 'wp_governance_config', $callback );
-        $this->filters_to_remove[] = [ 'wp_governance_config', $callback, 10 ];
+        add_filter( 'govguard_config', $callback );
+        $this->filters_to_remove[] = [ 'govguard_config', $callback, 10 ];
 
         Config::reset();
 
-        require_once WP_GOVERNANCE_DIR . 'modules/class-capabilities.php';
-        new \WP_Governance\Modules\Capabilities( $deny_map, Config::get() );
+        require_once GOVGUARD_DIR . 'modules/class-capabilities.php';
+        new \GovGuard\Modules\Capabilities( $deny_map, Config::get() );
     }
 }

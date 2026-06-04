@@ -1,8 +1,8 @@
 <?php
 
-namespace WP_Governance\Modules;
+namespace GovGuard\Modules;
 
-use WP_Governance\Config;
+use GovGuard\Config;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -82,7 +82,7 @@ class Uploads {
 		 * @param array $allowed The governance-configured MIME types.
 		 * @param array $mimes   The original WordPress MIME types.
 		 */
-		return apply_filters( 'wp_governance_allowed_mimes', $this->allowed, $mimes );
+		return apply_filters( 'govguard_allowed_mimes', $this->allowed, $mimes );
 	}
 
 	/**
@@ -224,7 +224,7 @@ class Uploads {
 			return $this->allowed_lookup;
 		}
 
-		$allowed = apply_filters( 'wp_governance_allowed_mimes', $this->allowed, wp_get_mime_types() );
+		$allowed = apply_filters( 'govguard_allowed_mimes', $this->allowed, wp_get_mime_types() );
 		$lookup  = array();
 
 		foreach ( $allowed as $extensions => $mime ) {

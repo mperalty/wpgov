@@ -4,13 +4,13 @@ includes:
 parameters:
     level: 5
     paths:
-        - wp-governance.php
-        - wp-governance/
+        - governance-guardrails.php
+        - governance-guardrails/
     excludePaths:
-        - wp-governance/wp-governance-config.php
+        - governance-guardrails/governance-guardrails-config.php
     bootstrapFiles:
         - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
         - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
     ignoreErrors:
-        - '#Constructor of class WP_Governance\\Modules\\[A-Za-z_]+ has an unused parameter \$config#'
+        - '#Constructor of class GovGuard\\Modules\\[A-Za-z_]+ has an unused parameter \$config#'
     reportUnmatchedIgnoredErrors: false
