@@ -79,6 +79,7 @@ class Security {
 		// Disable file editing (theme + plugin editors) — belt-and-suspenders with Features module.
 		if ( ! empty( $this->settings['disable_file_editing'] ) ) {
 			if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WordPress core constant.
 				define( 'DISALLOW_FILE_EDIT', true );
 			}
 		}

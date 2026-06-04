@@ -1668,6 +1668,15 @@ class Config {
 	 * @return bool
 	 */
 	public static function current_user_is_unrestricted(): bool {
+		// Bail while WordPress is still resolving the current user (the
+		// authentication filters that run on `determine_current_user`).
+		// Calling wp_get_current_user() here would re-enter those filters
+		// — e.g. wp_is_application_passwords_available() — and recurse until
+		// memory is exhausted. Treat the user as restricted during resolution.
+		if ( doing_filter( 'determine_current_user' ) ) {
+			return false;
+		}
+
 		if ( ! is_user_logged_in() ) {
 			return false;
 		}
@@ -1767,8 +1776,8 @@ class Config {
 				! empty( $value ) &&
 				isset( $base[ $key ] ) &&
 				is_array( $base[ $key ] ) &&
-				! array_is_list( $value ) &&
-				! array_is_list( $base[ $key ] )
+				! self::is_list( $value ) &&
+				! self::is_list( $base[ $key ] )
 			) {
 				// Both sides are non-empty associative arrays — recurse.
 				$base[ $key ] = self::deep_merge( $base[ $key ], $value );
@@ -1779,6 +1788,25 @@ class Config {
 		}
 
 		return $base;
+	}
+
+	/**
+	 * Determine whether an array is a list (sequential 0-based integer keys).
+	 *
+	 * Reimplements array_is_list() so the plugin keeps its WordPress 6.4
+	 * minimum — array_is_list() is reported against a 6.5 compatibility shim.
+	 *
+	 * @param array $value Array to test.
+	 * @phpstan-param array<int|string, mixed> $value Array to test.
+	 * @psalm-param array $value Array to test.
+	 * @return bool
+	 */
+	private static function is_list( array $value ): bool {
+		if ( array() === $value ) {
+			return true;
+		}
+
+		return array_keys( $value ) === range( 0, count( $value ) - 1 );
 	}
 
 	/**
