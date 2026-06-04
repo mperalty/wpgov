@@ -47,17 +47,17 @@ Config loading is fail-open. If the config file is missing, unreadable, has a sy
 
 = WP-CLI =
 
-When WP-CLI is available, Governance Guardrails registers the `wp govguard` command set.
+When WP-CLI is available, Governance Guardrails registers the `wp governance` command set.
 
 Examples:
 
-* `wp govguard status`
-* `wp govguard check`
-* `wp govguard audit`
-* `wp govguard audit --severity=high`
-* `wp govguard diff`
-* `wp govguard get features --format=json`
-* `wp govguard mimes`
+* `wp governance status`
+* `wp governance check`
+* `wp governance audit`
+* `wp governance audit --severity=high`
+* `wp governance diff`
+* `wp governance get features --format=json`
+* `wp governance mimes`
 
 == Installation ==
 
@@ -67,14 +67,14 @@ Examples:
 2. Activate Governance Guardrails through the Plugins screen in WordPress.
 3. Review the included sample config at `governance-guardrails/governance-guardrails-config.php`.
 4. For a site-specific policy, define `GOVGUARD_CONFIG` in `wp-config.php` and point it at your own config file.
-5. If WP-CLI is available, run `wp govguard check` to validate the active config.
+5. If WP-CLI is available, run `wp governance check` to validate the active config.
 
 = Must-use plugin installation =
 
 1. Copy `governance-guardrails.php` and the `governance-guardrails/` directory into `wp-content/mu-plugins/`.
 2. Review or replace the config file at `wp-content/mu-plugins/governance-guardrails/governance-guardrails-config.php`.
 3. Optionally define `GOVGUARD_CONFIG` in `wp-config.php` to point at a config file outside the plugin directory.
-4. If WP-CLI is available, run `wp govguard status` or `wp govguard check`.
+4. If WP-CLI is available, run `wp governance status` or `wp governance check`.
 
 == Frequently Asked Questions ==
 

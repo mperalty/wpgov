@@ -13,33 +13,33 @@ defined( 'ABSPATH' ) || exit;
  * ## EXAMPLES
  *
  *     # Show governance status overview
- *     wp govguard status
+ *     wp governance status
  *
  *     # Validate the config file
- *     wp govguard check
+ *     wp governance check
  *
  *     # List all feature toggles
- *     wp govguard features
+ *     wp governance features
  *
  *     # List denied capabilities by role
- *     wp govguard caps
+ *     wp governance caps
  *
  *     # List restricted menu slugs
- *     wp govguard menus
+ *     wp governance menus
  *
  *     # List allowed MIME types
- *     wp govguard mimes
+ *     wp governance mimes
  *
  *     # Export the full effective config as JSON
- *     wp govguard export
+ *     wp governance export
  *
  *     # Show a specific config section
- *     wp govguard get features
- *     wp govguard get login
+ *     wp governance get features
+ *     wp governance get login
  *
  *     # Audit the site for ungoverned items
- *     wp govguard audit
- *     wp govguard audit --severity=high
+ *     wp governance audit
+ *     wp governance audit --severity=high
  */
 class CLI extends \WP_CLI_Command {
 
@@ -64,8 +64,8 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard status
-	 * wp govguard status --format=json
+	 * wp governance status
+	 * wp governance status --format=json
 	 *
 	 * @subcommand status
 	 * @param array $args Positional WP-CLI arguments.
@@ -256,7 +256,7 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard check
+	 * wp governance check
 	 *
 	 * @subcommand check
 	 * @param array $args Positional WP-CLI arguments.
@@ -327,9 +327,9 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard features
-	 * wp govguard features --status=enforced
-	 * wp govguard features --format=json
+	 * wp governance features
+	 * wp governance features --status=enforced
+	 * wp governance features --format=json
 	 *
 	 * @subcommand features
 	 *
@@ -395,8 +395,8 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard caps
-	 * wp govguard caps --role=editor
+	 * wp governance caps
+	 * wp governance caps --role=editor
 	 *
 	 * @subcommand caps
 	 *
@@ -459,7 +459,7 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard menus
+	 * wp governance menus
 	 *
 	 * @subcommand menus
 	 *
@@ -506,7 +506,7 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard mimes
+	 * wp governance mimes
 	 *
 	 * @subcommand mimes
 	 *
@@ -557,9 +557,9 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard get features
-	 * wp govguard get login
-	 * wp govguard get content --format=yaml
+	 * wp governance get features
+	 * wp governance get login
+	 * wp governance get content --format=yaml
 	 *
 	 * @subcommand get
 	 * @param array $args Positional WP-CLI arguments.
@@ -596,9 +596,9 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard export
-	 * wp govguard export --pretty
-	 * wp govguard export > governance-backup.json
+	 * wp governance export
+	 * wp governance export --pretty
+	 * wp governance export > governance-backup.json
 	 *
 	 * @subcommand export
 	 * @param array $args Positional WP-CLI arguments.
@@ -627,7 +627,7 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard diff
+	 * wp governance diff
 	 *
 	 * @subcommand diff
 	 *
@@ -706,9 +706,9 @@ class CLI extends \WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp govguard audit
-	 * wp govguard audit --severity=high
-	 * wp govguard audit --format=json
+	 * wp governance audit
+	 * wp governance audit --severity=high
+	 * wp governance audit --format=json
 	 *
 	 * @subcommand audit
 	 *
