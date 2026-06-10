@@ -141,3 +141,47 @@ composer lint
 ```
 
 If available, also run the WordPress.org Plugin Check plugin or CLI workflow against the final zip.
+
+---
+
+# Review round 2 fixes — 2026-06-09
+
+Responses to the WordPress.org plugin review email (Plugin URI, wp_enqueue usage, changing global behaviour), plus a sweep for similar issues.
+
+## 1. Plugin URI seems to be invalid
+
+The reviewer's checker timed out fetching `https://github.com/mperalty/wpgov`. The repository is now publicly reachable (verified anonymously with an HTTP 200 response), so the header was left unchanged. If the repository was private at review time, it must stay public for resubmission.
+
+## 2. Use wp_enqueue commands
+
+All four flagged inline `<script>`/`<style>` echoes were converted to the enqueue APIs:
+
+- `modules/class-locked-options.php` — the field-lock script moved from an `admin_footer` echo to `admin_enqueue_scripts` with `wp_register_script( 'govguard-locked-options', false, ... )` + `wp_enqueue_script()` + `wp_add_inline_script()`. The "Locked by Governance Guardrails" tooltip string is now translatable and JSON-encoded.
+- `modules/class-features.php` (registration toggle) — `admin_head-options-general.php` echo replaced with `admin_enqueue_scripts` + `wp_register_style( 'govguard-registration-lock', false, ... )` + `wp_add_inline_style()`, gated on the `options-general.php` hook suffix.
+- `modules/class-features.php` (permalink lock) — same pattern with the `govguard-permalink-lock` handle on `options-permalink.php`.
+- `modules/class-login.php` — `login_head` echo replaced with `login_enqueue_scripts` + `wp_register_style( 'govguard-login', false, ... )` + `wp_add_inline_style()`.
+
+## 3. Changing global behaviour (defining core constants)
+
+All runtime `define()` calls of WordPress core constants were replaced with targeted, plugin-scoped filters. No functionality was removed:
+
+- `AUTOSAVE_INTERVAL` (`modules/class-content.php`) — replaced with a `block_editor_settings_all` filter (`autosaveInterval`) for the block editor plus a `wp_add_inline_script( 'autosave', ..., 'before' )` override of `autosaveL10n.autosaveInterval` for the classic editor. The previous define was dead code in normal plugin mode because core defines the constant in `wp_functionality_constants()`.
+- `DISABLE_WP_CRON` (`modules/class-features.php`) — replaced with a `pre_get_ready_cron_jobs` filter that returns an empty list only when `wp_doing_cron()` is false. Page loads no longer spawn loopback cron requests, while direct `wp-cron.php` hits and WP-CLI cron runs (which set `DOING_CRON`) still see the live queue. The sample config and a new readme FAQ now state that a real system cron is required.
+- `WP_POST_REVISIONS` (`modules/class-content.php`) — replaced with `add_filter( 'wp_revisions_to_keep', '__return_zero', 999 )`, which is exactly how core maps `WP_POST_REVISIONS = false`.
+- `DISALLOW_FILE_EDIT` (`modules/class-features.php` and `modules/class-security.php`) — replaced with a `file_mod_allowed` filter that returns false only for the `capability_edit_themes` context (the same scope core gives the constant in `map_meta_cap()`).
+- `DISALLOW_FILE_MODS` (`modules/class-features.php`) — replaced with `add_filter( 'file_mod_allowed', '__return_false', 999 )`, covering every context the constant covers.
+
+## 4. Additional fixes found during the sweep
+
+- `class-cli.php` — `wp governance caps` without `--role` listed nothing because the null default failed the `'' !== $filter_role` guard. Fixed by defaulting the filter to an empty string.
+- `modules/class-locked-options.php` — the admin notice text was hardcoded English; now uses `_n()` with the plugin text domain, `number_format_i18n()`, and `wp_kses()`.
+- Removed two stale tests for a `disable_updates` feature that does not exist in the plugin, and fixed the status-page render test to authenticate as an administrator (the render gate added in round 1 made it fail).
+- Added `bin/build-zip.php` to build the submission zip reproducibly.
+
+## Verification (round 2)
+
+- `php bin/lint.php` — syntax OK for 50 files.
+- `phpcs --standard=phpcs.xml.dist` — clean.
+- `phpstan analyse` — no errors.
+- `phpunit` — 194 tests, 389 assertions, all passing (baseline before fixes was 186 tests with 2 failures and 2 errors).
+- Rebuilt `governance-guardrails-1.0.0.zip` from the fixed tree.

@@ -102,6 +102,10 @@ The core governance model is file-based. It reads policy from a PHP config file 
 
 No. Governance Guardrails does not include phone-home tracking or external service calls.
 
+= How does the disable_wp_cron option work? =
+
+When enabled, Governance Guardrails stops WordPress from spawning WP-Cron requests on normal page views by filtering the list of ready cron jobs. It does not define the global DISABLE_WP_CRON constant, and it does not delete or unschedule any events. Direct requests to wp-cron.php and WP-CLI cron commands continue to work normally, so this option should be paired with a real system cron — for example a scheduled request to wp-cron.php or `wp cron event run --due-now`. Without one, scheduled events will not run.
+
 = Who should use this plugin? =
 
 It is most useful for developers, agencies, and managed WordPress teams that want repeatable policy controls across one or more sites. It may be more technical than a typical settings-screen plugin because the policy is configured in PHP.

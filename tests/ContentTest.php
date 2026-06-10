@@ -16,9 +16,54 @@ class ContentTest extends WP_UnitTestCase {
         remove_all_filters( 'wp_revisions_to_keep' );
         remove_all_filters( 'tiny_mce_plugins' );
         remove_all_filters( 'wp_resource_hints' );
+        remove_all_filters( 'block_editor_settings_all' );
+        remove_all_actions( 'admin_enqueue_scripts' );
 
         Config::reset();
         parent::tearDown();
+    }
+
+    public function test_revisions_disabled_keeps_zero_revisions(): void {
+        $settings = [
+            'disable_revisions' => true,
+        ];
+
+        $this->load_module($settings);
+
+        $limit = apply_filters('wp_revisions_to_keep', 10, new stdClass());
+        $this->assertSame(0, $limit);
+    }
+
+    public function test_autosave_interval_applied_to_block_editor(): void {
+        $settings = [
+            'autosave_interval' => 120,
+        ];
+
+        $this->load_module($settings);
+
+        $editor_settings = apply_filters('block_editor_settings_all', [], null);
+        $this->assertSame(120, $editor_settings['autosaveInterval']);
+    }
+
+    public function test_autosave_interval_overrides_classic_editor_setting(): void {
+        $settings = [
+            'autosave_interval' => 120,
+        ];
+
+        $this->load_module($settings);
+
+        set_current_screen('post');
+        do_action('admin_enqueue_scripts', 'post.php');
+
+        $inline = wp_scripts()->get_data('autosave', 'before');
+        $this->assertNotEmpty($inline);
+        $this->assertStringContainsString(
+            'autosaveInterval = 120',
+            implode('', array_filter((array) $inline, 'is_string'))
+        );
+
+        // Clean up the inline data attached to the shared core handle.
+        wp_scripts()->add_data('autosave', 'before', []);
     }
 
     public function test_revision_limit_enforced(): void {

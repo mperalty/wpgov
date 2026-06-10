@@ -31,7 +31,10 @@ class LockedOptionsTest extends WP_UnitTestCase {
             remove_all_filters( "pre_update_option_{$opt}" );
         }
         remove_all_actions( 'admin_notices' );
-        remove_all_actions( 'admin_footer' );
+        remove_all_actions( 'admin_enqueue_scripts' );
+
+        wp_dequeue_script( 'govguard-locked-options' );
+        wp_deregister_script( 'govguard-locked-options' );
 
         Config::reset();
         parent::tearDown();
@@ -111,7 +114,34 @@ class LockedOptionsTest extends WP_UnitTestCase {
         $this->load_module( array( 'date_format' => 'Y-m-d' ) );
 
         $this->assertNotFalse( has_action( 'admin_notices' ) );
-        $this->assertNotFalse( has_action( 'admin_footer' ) );
+        $this->assertNotFalse( has_action( 'admin_enqueue_scripts' ) );
+    }
+
+    public function test_field_lock_script_enqueued_on_settings_screens(): void {
+        set_current_screen( 'options-general' );
+
+        $this->load_module( array( 'date_format' => 'Y-m-d' ) );
+
+        do_action( 'admin_enqueue_scripts', 'options-general.php' );
+
+        $this->assertTrue( wp_script_is( 'govguard-locked-options', 'enqueued' ) );
+
+        $inline = wp_scripts()->get_data( 'govguard-locked-options', 'after' );
+        $this->assertNotEmpty( $inline );
+        $this->assertStringContainsString(
+            'date_format',
+            implode( '', array_filter( (array) $inline, 'is_string' ) )
+        );
+    }
+
+    public function test_field_lock_script_not_enqueued_on_other_screens(): void {
+        set_current_screen( 'options-general' );
+
+        $this->load_module( array( 'date_format' => 'Y-m-d' ) );
+
+        do_action( 'admin_enqueue_scripts', 'index.php' );
+
+        $this->assertFalse( wp_script_is( 'govguard-locked-options', 'enqueued' ) );
     }
 
     // ── Helper ──────────────────────────────────────────────────

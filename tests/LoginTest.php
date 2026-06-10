@@ -20,7 +20,10 @@ class LoginTest extends WP_UnitTestCase {
         remove_all_filters( 'logout_redirect' );
         remove_all_actions( 'login_form_lostpassword' );
         remove_all_actions( 'login_form_retrievepassword' );
-        remove_all_actions( 'login_head' );
+        remove_all_actions( 'login_enqueue_scripts' );
+
+        wp_dequeue_style( 'govguard-login' );
+        wp_deregister_style( 'govguard-login' );
 
         wp_set_current_user( 0 );
         Config::reset();
@@ -47,7 +50,11 @@ class LoginTest extends WP_UnitTestCase {
         $settings = ['disable_password_reset' => true];
         $this->load_module($settings);
 
-        $this->assertNotFalse(has_action('login_head'));
+        $this->assertNotFalse(has_action('login_enqueue_scripts'));
+
+        do_action('login_enqueue_scripts');
+
+        $this->assertTrue(wp_style_is('govguard-login', 'enqueued'));
     }
 
     public function test_password_reset_allowed_when_off(): void {

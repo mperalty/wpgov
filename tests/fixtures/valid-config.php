@@ -21,7 +21,6 @@ return [
         'disable_search'                => true,
         'disable_feeds'                 => true,
         'disable_file_mods'             => false,
-        'disable_updates'               => false,
         'force_ssl_admin'               => false,
         'disable_tagline_editing'       => true,
         'lock_permalink_structure'      => true,

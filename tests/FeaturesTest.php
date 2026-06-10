@@ -31,6 +31,11 @@ class FeaturesTest extends WP_UnitTestCase {
             remove_all_actions( $hook );
         }
 
+        foreach ( [ 'govguard-registration-lock', 'govguard-permalink-lock' ] as $handle ) {
+            wp_dequeue_style( $handle );
+            wp_deregister_style( $handle );
+        }
+
         wp_set_current_user( 0 );
         Config::reset();
         parent::tearDown();
@@ -179,9 +184,23 @@ class FeaturesTest extends WP_UnitTestCase {
     }
 
     public function test_user_registration_hides_admin_toggle(): void {
+        set_current_screen( 'options-general' );
         $this->load_module_with( [ 'disable_user_registration' => true ] );
 
-        $this->assertNotFalse( has_action( 'admin_head-options-general.php' ) );
+        $this->assertNotFalse( has_action( 'admin_enqueue_scripts' ) );
+
+        do_action( 'admin_enqueue_scripts', 'options-general.php' );
+
+        $this->assertTrue( wp_style_is( 'govguard-registration-lock', 'enqueued' ) );
+    }
+
+    public function test_user_registration_toggle_untouched_on_other_screens(): void {
+        set_current_screen( 'dashboard' );
+        $this->load_module_with( [ 'disable_user_registration' => true ] );
+
+        do_action( 'admin_enqueue_scripts', 'index.php' );
+
+        $this->assertFalse( wp_style_is( 'govguard-registration-lock', 'enqueued' ) );
     }
 
     // ── Comments ─────────────────────────────────────────────────
@@ -209,34 +228,44 @@ class FeaturesTest extends WP_UnitTestCase {
         $this->assertFalse( apply_filters( 'themes_auto_update_enabled', true ) );
     }
 
-    public function test_update_checks_are_short_circuited(): void {
-        $this->load_module_with( [ 'disable_updates' => true ] );
+    // ── File Editor / File Mods ──────────────────────────────────
 
-        $core = apply_filters( 'pre_site_transient_update_core', false );
-        $this->assertInstanceOf( stdClass::class, $core );
-        $this->assertSame( [], $core->updates );
-        $this->assertNotEmpty( $core->version_checked );
+    public function test_file_editor_disabled_via_capability_context(): void {
+        $this->load_module_with( [ 'disable_file_editor' => true ] );
 
-        $plugins = apply_filters( 'pre_site_transient_update_plugins', false );
-        $this->assertInstanceOf( stdClass::class, $plugins );
-        $this->assertSame( [], $plugins->response );
-        $this->assertSame( [], $plugins->no_update );
+        $this->assertFalse( apply_filters( 'file_mod_allowed', true, 'capability_edit_themes' ) );
 
-        $themes = apply_filters( 'pre_site_transient_update_themes', false );
-        $this->assertInstanceOf( stdClass::class, $themes );
-        $this->assertSame( [], $themes->response );
-        $this->assertSame( [], $themes->no_update );
+        // Installs and updates remain allowed.
+        $this->assertTrue( apply_filters( 'file_mod_allowed', true, 'capability_update_core' ) );
+        $this->assertTrue( apply_filters( 'file_mod_allowed', true, 'automatic_updater' ) );
     }
 
-    public function test_automatic_updates_are_disabled(): void {
-        $this->load_module_with( [ 'disable_updates' => true ] );
+    public function test_file_mods_disabled_for_all_contexts(): void {
+        $this->load_module_with( [ 'disable_file_mods' => true ] );
 
-        $this->assertTrue( apply_filters( 'automatic_updater_disabled', false ) );
-        $this->assertFalse( apply_filters( 'auto_update_core', true, (object) [] ) );
-        $this->assertFalse( apply_filters( 'auto_update_plugin', true, (object) [] ) );
-        $this->assertFalse( apply_filters( 'auto_update_theme', true, (object) [] ) );
-        $this->assertFalse( apply_filters( 'allow_major_auto_core_updates', true ) );
-        $this->assertFalse( apply_filters( 'send_core_update_notification_email', true, (object) [] ) );
+        $this->assertFalse( apply_filters( 'file_mod_allowed', true, 'capability_edit_themes' ) );
+        $this->assertFalse( apply_filters( 'file_mod_allowed', true, 'capability_update_core' ) );
+        $this->assertFalse( apply_filters( 'file_mod_allowed', true, 'automatic_updater' ) );
+    }
+
+    // ── WP-Cron ──────────────────────────────────────────────────
+
+    public function test_wp_cron_spawning_disabled_for_page_loads(): void {
+        $this->load_module_with( [ 'disable_wp_cron' => true ] );
+
+        // Page loads see an empty ready-job queue, so no loopback spawn occurs.
+        $this->assertSame( [], apply_filters( 'pre_get_ready_cron_jobs', null ) );
+    }
+
+    public function test_wp_cron_queue_visible_to_real_cron_runners(): void {
+        $this->load_module_with( [ 'disable_wp_cron' => true ] );
+
+        $doing_cron = static fn(): bool => true;
+        add_filter( 'wp_doing_cron', $doing_cron );
+        $this->filters_to_remove[] = [ 'wp_doing_cron', $doing_cron, 10 ];
+
+        // Real cron runners (wp-cron.php, WP-CLI) fall through to the live queue.
+        $this->assertNull( apply_filters( 'pre_get_ready_cron_jobs', null ) );
     }
 
     public function test_search_disable_only_affects_the_main_query(): void {
@@ -290,10 +319,15 @@ class FeaturesTest extends WP_UnitTestCase {
     }
 
     public function test_permalink_lock_disables_admin_ui(): void {
+        set_current_screen( 'options-permalink' );
         $this->load_module_with( [ 'lock_permalink_structure' => true ] );
 
         $this->assertNotFalse( has_action( 'admin_notices' ) );
-        $this->assertNotFalse( has_action( 'admin_head-options-permalink.php' ) );
+        $this->assertNotFalse( has_action( 'admin_enqueue_scripts' ) );
+
+        do_action( 'admin_enqueue_scripts', 'options-permalink.php' );
+
+        $this->assertTrue( wp_style_is( 'govguard-permalink-lock', 'enqueued' ) );
     }
 
     // ── Helper ───────────────────────────────────────────────────
@@ -367,8 +401,9 @@ class FeaturesTest extends WP_UnitTestCase {
             'do_feed_atom_comments',
             'pre_update_option_blogdescription',
             'pre_update_option_permalink_structure',
-            'admin_head-options-general.php',
-            'admin_head-options-permalink.php',
+            'admin_enqueue_scripts',
+            'pre_get_ready_cron_jobs',
+            'file_mod_allowed',
             'load-plugins.php',
             'load-themes.php',
             'load-update-core.php',

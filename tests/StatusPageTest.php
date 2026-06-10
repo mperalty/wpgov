@@ -73,6 +73,9 @@ class StatusPageTest extends WP_UnitTestCase {
     }
 
     public function test_render_outputs_custom_rule_metadata(): void {
+        $user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+        wp_set_current_user( $user_id );
+
         $config = [
             'features' => [
                 'disable_xmlrpc' => true,

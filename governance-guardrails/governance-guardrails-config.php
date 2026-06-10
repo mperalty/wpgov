@@ -76,8 +76,9 @@ return array(
 		// Disable all RSS/Atom feeds (redirects feed URLs to homepage).
 		'disable_feeds'                 => false,
 
-		// Prevent file modifications by setting DISALLOW_FILE_MODS.
-		// This does not alter WordPress.org update routines.
+		// Prevent file modifications (plugin/theme installs, updates, and edits)
+		// via the core file_mod_allowed filter — equivalent in scope to the
+		// DISALLOW_FILE_MODS constant, but applied only while this plugin is active.
 		'disable_file_mods'             => false,
 
 		// Admin SSL is not enforced by this plugin: the FORCE_SSL_ADMIN constant
@@ -91,7 +92,11 @@ return array(
 		// Lock the permalink structure so it cannot be changed via Settings → Permalinks.
 		'lock_permalink_structure'      => false,
 
-		// Disable the built-in WordPress cron system (use a real system cron instead).
+		// Stop WordPress from spawning WP-Cron on normal page views.
+		// IMPORTANT: only enable this when a real system cron is in place —
+		// e.g. hitting wp-cron.php on a schedule or running
+		// `wp cron event run --due-now`. Those runners keep working because
+		// they set DOING_CRON; without one, scheduled events will not run.
 		'disable_wp_cron'               => false,
 	),
 

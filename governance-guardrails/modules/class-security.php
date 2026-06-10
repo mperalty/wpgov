@@ -78,10 +78,7 @@ class Security {
 
 		// Disable file editing (theme + plugin editors) — belt-and-suspenders with Features module.
 		if ( ! empty( $this->settings['disable_file_editing'] ) ) {
-			if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
-				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WordPress core constant.
-				define( 'DISALLOW_FILE_EDIT', true );
-			}
+			add_filter( 'file_mod_allowed', array( $this, 'filter_file_edit_allowed' ), 10, 2 );
 		}
 
 		// Remove version query strings from enqueued scripts/styles.
@@ -103,6 +100,19 @@ class Security {
 	 */
 	public function filter_headers( array $headers ): array {
 		return $this->apply_header_policy( $headers );
+	}
+
+	/**
+	 * Block the theme/plugin file editors via the capability context only,
+	 * leaving installs and updates unaffected. Same scope as the core
+	 * DISALLOW_FILE_EDIT constant without defining a global constant.
+	 *
+	 * @param bool   $allowed Whether file modifications of this type are allowed.
+	 * @param string $context The usage context.
+	 * @return bool
+	 */
+	public function filter_file_edit_allowed( bool $allowed, string $context ): bool {
+		return 'capability_edit_themes' === $context ? false : $allowed;
 	}
 
 	/**

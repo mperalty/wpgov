@@ -38,9 +38,10 @@ class Content {
 
 	private function handle_revisions(): void {
 		if ( ! empty( $this->settings['disable_revisions'] ) ) {
-			if ( ! defined( 'WP_POST_REVISIONS' ) ) {
-				define( 'WP_POST_REVISIONS', false );
-			}
+			// Keep zero revisions for every post type. Equivalent to setting
+			// WP_POST_REVISIONS to false, but scoped to this plugin instead
+			// of defining a global constant.
+			add_filter( 'wp_revisions_to_keep', '__return_zero', 999 );
 			return;
 		}
 
@@ -67,10 +68,30 @@ class Content {
 		}
 
 		if ( ! empty( $this->settings['autosave_interval'] ) ) {
-			$interval = (int) $this->settings['autosave_interval'];
-			if ( ! defined( 'AUTOSAVE_INTERVAL' ) ) {
-				define( 'AUTOSAVE_INTERVAL', $interval );
-			}
+			$interval = max( 1, (int) $this->settings['autosave_interval'] );
+
+			// The block editor reads the interval from its editor settings.
+			add_filter(
+				'block_editor_settings_all',
+				static function ( array $editor_settings ) use ( $interval ): array {
+					$editor_settings['autosaveInterval'] = $interval;
+					return $editor_settings;
+				}
+			);
+
+			// The classic editor reads autosaveL10n.autosaveInterval, which is
+			// printed alongside the core autosave script. Override the value
+			// after the settings are printed but before the script executes.
+			add_action(
+				'admin_enqueue_scripts',
+				static function () use ( $interval ): void {
+					wp_add_inline_script(
+						'autosave',
+						sprintf( 'if ( window.autosaveL10n ) { window.autosaveL10n.autosaveInterval = %d; }', $interval ),
+						'before'
+					);
+				}
+			);
 		}
 	}
 

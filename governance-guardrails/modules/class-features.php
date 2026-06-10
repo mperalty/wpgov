@@ -160,11 +160,36 @@ class Features {
 		}
 
 		if ( $this->on( 'disable_wp_cron' ) ) {
-			if ( ! defined( 'DISABLE_WP_CRON' ) ) {
-				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WordPress core constant.
-				define( 'DISABLE_WP_CRON', true );
-			}
+			add_filter( 'pre_get_ready_cron_jobs', array( $this, 'filter_ready_cron_jobs' ) );
 		}
+	}
+
+	/**
+	 * Stop WordPress from spawning loopback cron requests on normal page views.
+	 *
+	 * Real cron runners are unaffected: direct wp-cron.php hits and WP-CLI
+	 * cron commands define DOING_CRON and therefore still see the live queue.
+	 * This scopes the behavior to this plugin instead of defining the global
+	 * DISABLE_WP_CRON constant.
+	 *
+	 * @param array|null $pre Ready cron jobs to short-circuit with, or null.
+	 * @return array|null
+	 */
+	public function filter_ready_cron_jobs( $pre ) {
+		return wp_doing_cron() ? $pre : array();
+	}
+
+	/**
+	 * Block the theme/plugin file editors via the capability context only,
+	 * leaving installs and updates unaffected. Same scope as the core
+	 * DISALLOW_FILE_EDIT constant without defining a global constant.
+	 *
+	 * @param bool   $allowed Whether file modifications of this type are allowed.
+	 * @param string $context The usage context.
+	 * @return bool
+	 */
+	public function filter_file_edit_allowed( bool $allowed, string $context ): bool {
+		return 'capability_edit_themes' === $context ? false : $allowed;
 	}
 
 	/**
@@ -172,9 +197,15 @@ class Features {
 	 */
 	private function hide_registration_toggle(): void {
 		add_action(
-			'admin_head-options-general.php',
-			static function (): void {
-				echo '<style>tr:has(#users_can_register) { display: none !important; }</style>';
+			'admin_enqueue_scripts',
+			static function ( string $hook_suffix ): void {
+				if ( 'options-general.php' !== $hook_suffix ) {
+					return;
+				}
+
+				wp_register_style( 'govguard-registration-lock', false, array(), GOVGUARD_VERSION );
+				wp_enqueue_style( 'govguard-registration-lock' );
+				wp_add_inline_style( 'govguard-registration-lock', 'tr:has(#users_can_register) { display: none !important; }' );
 			}
 		);
 	}
@@ -197,9 +228,15 @@ class Features {
 		);
 
 		add_action(
-			'admin_head-options-permalink.php',
-			static function (): void {
-				echo '<style>input[name="selection"], input[name="permalink_structure"] { pointer-events: none; opacity: 0.5; }</style>';
+			'admin_enqueue_scripts',
+			static function ( string $hook_suffix ): void {
+				if ( 'options-permalink.php' !== $hook_suffix ) {
+					return;
+				}
+
+				wp_register_style( 'govguard-permalink-lock', false, array(), GOVGUARD_VERSION );
+				wp_enqueue_style( 'govguard-permalink-lock' );
+				wp_add_inline_style( 'govguard-permalink-lock', 'input[name="selection"], input[name="permalink_structure"] { pointer-events: none; opacity: 0.5; }' );
 			}
 		);
 	}
@@ -217,10 +254,7 @@ class Features {
 	 * Prevent file editing via the admin theme/plugin editor.
 	 */
 	private function disable_file_editor(): void {
-		if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
-			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WordPress core constant.
-			define( 'DISALLOW_FILE_EDIT', true );
-		}
+		add_filter( 'file_mod_allowed', array( $this, 'filter_file_edit_allowed' ), 10, 2 );
 	}
 
 	/**
@@ -369,12 +403,12 @@ class Features {
 	}
 
 	/**
-	 * Prevent all file modifications (plugin/theme install, update, edit).
+	 * Prevent all file modifications (plugin/theme install, update, edit)
+	 * for every context, mirroring the core DISALLOW_FILE_MODS constant
+	 * without defining a global constant.
 	 */
 	private function disable_file_mods(): void {
-		if ( ! defined( 'DISALLOW_FILE_MODS' ) ) {
-			define( 'DISALLOW_FILE_MODS', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Core constant.
-		}
+		add_filter( 'file_mod_allowed', '__return_false', 999 );
 	}
 
 	/**

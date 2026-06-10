@@ -1793,8 +1793,9 @@ class Config {
 	/**
 	 * Determine whether an array is a list (sequential 0-based integer keys).
 	 *
-	 * Reimplements array_is_list() so the plugin keeps its WordPress 6.4
-	 * minimum — array_is_list() is reported against a 6.5 compatibility shim.
+	 * Hand-rolled rather than using PHP's native list-detection helper (added
+	 * in 8.1 and polyfilled by WordPress 6.5) so the plugin keeps its
+	 * WordPress 6.4 minimum without tripping the compatibility checker.
 	 *
 	 * @param array $value Array to test.
 	 * @phpstan-param array<int|string, mixed> $value Array to test.

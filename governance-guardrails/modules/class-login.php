@@ -43,9 +43,11 @@ class Login {
 
 			// Hide the "Lost your password?" link.
 			add_action(
-				'login_head',
+				'login_enqueue_scripts',
 				static function (): void {
-					echo '<style>#login #nav a[href*="lostpassword"] { display: none; }</style>';
+					wp_register_style( 'govguard-login', false, array(), GOVGUARD_VERSION );
+					wp_enqueue_style( 'govguard-login' );
+					wp_add_inline_style( 'govguard-login', '#login #nav a[href*="lostpassword"] { display: none; }' );
 				}
 			);
 		}

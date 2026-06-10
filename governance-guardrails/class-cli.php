@@ -416,7 +416,7 @@ class CLI extends \WP_CLI_Command {
 			return;
 		}
 
-		$filter_role = $assoc_args['role'] ?? null;
+		$filter_role = (string) ( $assoc_args['role'] ?? '' );
 		$rows        = array();
 
 		foreach ( $deny as $role => $caps ) {
